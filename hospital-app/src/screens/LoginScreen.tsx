@@ -28,7 +28,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     setLoginError('');
 
     if (navigation) {
-      if (rol === 'doctor') navigation.navigate('DoctorStack');
+      if (rol === 'doctor') navigation.navigate('DoctorHome');
       if (rol === 'paciente') navigation.navigate('PatientTabs');
       if (rol === 'recepcion') navigation.navigate('ReceptionStack');
     }
