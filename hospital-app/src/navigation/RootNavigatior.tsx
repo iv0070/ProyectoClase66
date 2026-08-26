@@ -3,13 +3,13 @@ import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import CustomButton from '../components/CustomButtom';
 import { pacientes } from '../data/mockData';
 
-interface PatientHomeScreenProps {
+interface PacienteHomeScreenProps {
   navigation?: any;
 }
 
 const pacienteActual = pacientes[0];
 
-export default function PatientHomeScreen({ navigation }: PatientHomeScreenProps) {
+export default function PacienteHomeScreen({ navigation }: PacienteHomeScreenProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
