@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import CustomButton from '../components/CustomButtom';
-import { citas, pacientes, doctores } from '../data/mockData';
+import { citas as citasIniciales, pacientes, doctores } from '../data/mockData';
 import { Cita } from '../types';
 
 interface DoctorHomeScreenProps {
@@ -11,6 +11,8 @@ interface DoctorHomeScreenProps {
 const doctorActual = doctores[1];
 
 export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) {
+  const [citas, setCitas] = useState<Cita[]>(citasIniciales);
+
   const citasDelDoctor = citas.filter((c) => c.doctorId === doctorActual.id);
 
   const getNombrePaciente = (pacienteId: string) => {
@@ -33,6 +35,31 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     }
   };
 
+  const handleConfirmar = (citaId: string) => {
+    setCitas((prev) =>
+      prev.map((c) => (c.id === citaId ? { ...c, estado: 'confirmada' } : c))
+    );
+  };
+
+  const handleRechazar = (citaId: string) => {
+    Alert.alert(
+      'Rechazar cita',
+      '¿Seguro que quieres rechazar esta cita?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Rechazar',
+          style: 'destructive',
+          onPress: () => {
+            setCitas((prev) =>
+              prev.map((c) => (c.id === citaId ? { ...c, estado: 'rechazada' } : c))
+            );
+          },
+        },
+      ]
+    );
+  };
+
   const renderCita = ({ item }: { item: Cita }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -42,6 +69,23 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
         </View>
       </View>
       <Text style={styles.hora}>{item.fecha} · {item.hora}</Text>
+
+      {item.estado === 'pendiente' && (
+        <View style={styles.accionesRow}>
+          <CustomButton
+            title="Confirmar"
+            onPress={() => handleConfirmar(item.id)}
+            variant="primary"
+            style={styles.accionButton}
+          />
+          <CustomButton
+            title="Rechazar"
+            onPress={() => handleRechazar(item.id)}
+            variant="danger"
+            style={styles.accionButton}
+          />
+        </View>
+      )}
     </View>
   );
 
@@ -127,6 +171,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#6B7280',
     marginTop: 6,
+  },
+  accionesRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10,
+  },
+  accionButton: {
+    flex: 1,
   },
   emptyText: {
     textAlign: 'center',
