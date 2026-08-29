@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
+import { doctores, pacientes } from '../data/mockData';
 
 type Role = 'doctor' | 'paciente' | 'recepcion';
 
@@ -20,17 +21,38 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       return;
     }
 
-    if (contrasena.length < 6) {
-      setLoginError('Usuario o contraseña incorrectos');
+    if (rol === 'doctor') {
+      const doctorValido = doctores.find(
+        (d) => d.usuario === usuario && d.contrasena === contrasena
+      );
+      if (!doctorValido) {
+        setLoginError('Usuario o contraseña incorrectos');
+        return;
+      }
+      setLoginError('');
+      navigation?.navigate('DoctorStack');
       return;
     }
 
-    setLoginError('');
+    if (rol === 'paciente') {
+      const pacienteValido = pacientes.find(
+        (p) => p.usuario === usuario && p.contrasena === contrasena
+      );
+      if (!pacienteValido) {
+        setLoginError('Usuario o contraseña incorrectos');
+        return;
+      }
+      setLoginError('');
+      navigation?.navigate('PatientTabs');
+      return;
+    }
 
-    if (navigation) {
-      if (rol === 'doctor') navigation.navigate('DoctorHome');
-      if (rol === 'paciente') navigation.navigate('PatientHome');
-if (rol === 'recepcion') navigation.navigate('ReceptionHome');
+    if (rol === 'recepcion') {
+      // Recepción no tiene expediente propio como doctor/paciente,
+      // solo valida que haya usuario y contraseña (ya verificado arriba).
+      setLoginError('');
+      navigation?.navigate('ReceptionStack');
+      return;
     }
   };
 
@@ -81,6 +103,10 @@ if (rol === 'recepcion') navigation.navigate('ReceptionHome');
           variant="danger"
           style={styles.roleButton}
         />
+
+        <Text style={styles.hintText}>
+          Prueba con: carla.mejia / 123456 (Doctor) · jose.martinez / 123456 (Paciente)
+        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -124,5 +150,11 @@ const styles = StyleSheet.create({
   },
   roleButton: {
     marginBottom: 10,
+  },
+  hintText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    marginTop: 16,
   },
 });

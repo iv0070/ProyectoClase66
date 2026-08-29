@@ -1,56 +1,31 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
-import CustomButton from '../components/CustomButtom';
-import { pacientes } from '../data/mockData';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import LoginScreen from '../screens/LoginScreen';
+import DoctorStackNavigator from './DoctorStackNavigator';
 
-interface PacienteHomeScreenProps {
-  navigation?: any;
-}
+import ReceptionStackNavigator from './ReceptionStackNavigator';
 
-const pacienteActual = pacientes[0];
+export type RootStackParamList = {
+  Login: undefined;
+  DoctorStack: undefined;
+  PatientTabs: undefined;
+  ReceptionStack: undefined;
+};
 
-export default function PacienteHomeScreen({ navigation }: PacienteHomeScreenProps) {
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+export default function RootNavigator() {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Hola, {pacienteActual.nombre}</Text>
-        <Text style={styles.subtitle}>¿Qué deseas hacer hoy?</Text>
-
-        <CustomButton
-          title="Agendar cita"
-          onPress={() => navigation?.navigate('AgendarCita')}
-          variant="primary"
-          style={styles.button}
-        />
-      </View>
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="Login"
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="DoctorStack" component={DoctorStackNavigator} />
+        <Stack.Screen name="ReceptionStack" component={ReceptionStackNavigator} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6B7280',
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  button: {
-    marginTop: 8,
-  },
-});

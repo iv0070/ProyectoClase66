@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
+import { pacientes } from '../data/mockData';
 
 interface NuevoPacienteScreenProps {
   navigation?: any;
@@ -11,16 +12,28 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
   const [nombre, setNombre] = useState('');
   const [edad, setEdad] = useState('');
   const [telefono, setTelefono] = useState('');
+  const [identidad, setIdentidad] = useState('');
   const [formError, setFormError] = useState('');
 
   const handleCrear = () => {
-    if (nombre.trim() === '' || edad.trim() === '' || telefono.trim() === '') {
+    if (
+      nombre.trim() === '' ||
+      edad.trim() === '' ||
+      telefono.trim() === '' ||
+      identidad.trim() === ''
+    ) {
       setFormError('Todos los campos son obligatorios');
       return;
     }
 
     if (isNaN(Number(edad))) {
       setFormError('La edad debe ser un número');
+      return;
+    }
+
+    const yaExiste = pacientes.some((p) => p.identidad === identidad.trim());
+    if (yaExiste) {
+      setFormError('Ya existe un paciente registrado con esa identidad');
       return;
     }
 
@@ -42,7 +55,7 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Nuevo paciente</Text>
-        <Text style={styles.subtitle}>Registra los datos básicos</Text>
+        <Text style={styles.subtitle}>Registra los datos basicos</Text>
 
         <CustomInput
           label="Nombre completo"
@@ -50,6 +63,14 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
           onChangeText={setNombre}
           validationType="text"
           placeholder="Nombre y apellido"
+        />
+
+        <CustomInput
+          label="Número de identidad"
+          value={identidad}
+          onChangeText={setIdentidad}
+          validationType="text"
+          placeholder="0501-1990-00000"
         />
 
         <CustomInput

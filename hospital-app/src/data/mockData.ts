@@ -3,23 +3,23 @@ import { Doctor, Paciente, Cita, Consulta, Farmacia } from '../types';
 export const doctores: Doctor[] = [
   {
     id: 'd1',
-    nombre: 'Dra. Carla Mejía',
+    nombre: 'Dra. Carla Mejia',
     usuario: 'carla.mejia',
     contrasena: '123456',
     especialidad: 'pediatria',
   },
   {
     id: 'd2',
-    nombre: 'Dr. Luis Ramírez',
+    nombre: 'Dr. Luis Ramirez',
     usuario: 'luis.ramirez',
-    contrasena: '123456',
+    contrasena: 'ABCDEF',
     especialidad: 'medicina_general',
   },
   {
     id: 'd3',
-    nombre: 'Dra. Andrea Zúniga',
+    nombre: 'Dra. Andrea Zuniga',
     usuario: 'andrea.zuniga',
-    contrasena: '123456',
+    contrasena: 'GHIJKL',
     especialidad: 'odontologia',
   },
 ];
@@ -27,27 +27,30 @@ export const doctores: Doctor[] = [
 export const pacientes: Paciente[] = [
   {
     id: 'p1',
-    nombre: 'José Martínez',
-    usuario: 'jose.martinez',
+    nombre: ' Ashly Cruz',
+    usuario: 'ashly.cruz',
     contrasena: '123456',
     edad: 34,
-    telefono: '9999-0001',
+    telefono: '3315-5249',
+    identidad: '0501-1992-00123',
   },
   {
     id: 'p2',
-    nombre: 'María Flores',
-    usuario: 'maria.flores',
-    contrasena: '123456',
+    nombre: 'Maria Jose Salinas',
+    usuario: 'majo.salinas',
+    contrasena: '7891011',
     edad: 67,
-    telefono: '9999-0002',
+    telefono: '9880-1938',
+    identidad: '0501-1959-00456',
   },
   {
     id: 'p3',
     nombre: 'Diego Sosa',
     usuario: 'diego.sosa',
-    contrasena: '123456',
+    contrasena: '909090',
     edad: 8,
-    telefono: '9999-0003',
+    telefono: '9234-2343',
+    identidad: '0501-2018-00789',
   },
 ];
 
@@ -94,7 +97,7 @@ export const consultas: Consulta[] = [
 
 export const farmacias: Farmacia[] = [
   { id: 'f1', nombre: 'Farmacia del Hospital', descuento: 15 },
-  { id: 'f2', nombre: 'Farmacias Simán', descuento: 10 },
+  { id: 'f2', nombre: 'Farmacias Siman', descuento: 10 },
   { id: 'f3', nombre: 'Farmacia Ahorro', descuento: 8 },
 ];
 

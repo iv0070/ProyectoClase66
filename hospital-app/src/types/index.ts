@@ -20,7 +20,6 @@ export interface Doctor {
   contrasena: string;
   especialidad: Especialidad;
 }
-
 export interface Paciente {
   id: string;
   nombre: string;
@@ -28,6 +27,7 @@ export interface Paciente {
   contrasena: string;
   edad: number;
   telefono: string;
+  identidad: string;
 }
 
 export interface Cita {
