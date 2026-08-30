@@ -44,7 +44,7 @@ export default function AgendarCitaScreen({ navigation }: AgendarCitaScreenProps
       [
         {
           text: 'OK',
-          onPress: () => navigation?.navigate('PatientHome'),
+        onPress: () => navigation?.navigate('PacienteHome'),
         },
       ]
     );

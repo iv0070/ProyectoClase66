@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import CustomButton from '../components/CustomButtom';
+import CustomInput from '../components/CustomInput';
 import { citas as citasIniciales, pacientes, doctores } from '../data/mockData';
 import { Cita } from '../types';
 
@@ -12,6 +13,10 @@ const doctorActual = doctores[1];
 
 export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) {
   const [citas, setCitas] = useState<Cita[]>(citasIniciales);
+  const [citaEnReprogramacion, setCitaEnReprogramacion] = useState<string | null>(null);
+  const [nuevaFecha, setNuevaFecha] = useState('');
+  const [nuevaHora, setNuevaHora] = useState('');
+  const [reprogramarError, setReprogramarError] = useState('');
 
   const citasDelDoctor = citas.filter((c) => c.doctorId === doctorActual.id);
 
@@ -60,6 +65,40 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     );
   };
 
+  const handleAbrirReprogramar = (citaId: string) => {
+    setCitaEnReprogramacion(citaId);
+    setNuevaFecha('');
+    setNuevaHora('');
+    setReprogramarError('');
+  };
+
+  const handleCancelarReprogramar = () => {
+    setCitaEnReprogramacion(null);
+    setNuevaFecha('');
+    setNuevaHora('');
+    setReprogramarError('');
+  };
+
+  const handleConfirmarReprogramacion = (citaId: string) => {
+    if (nuevaFecha.trim() === '' || nuevaHora.trim() === '') {
+      setReprogramarError('Debes ingresar fecha y hora nuevas');
+      return;
+    }
+
+    setCitas((prev) =>
+      prev.map((c) =>
+        c.id === citaId
+          ? { ...c, fecha: nuevaFecha, hora: nuevaHora, estado: 'pendiente' }
+          : c
+      )
+    );
+
+    setCitaEnReprogramacion(null);
+    setNuevaFecha('');
+    setNuevaHora('');
+    setReprogramarError('');
+  };
+
   const renderCita = ({ item }: { item: Cita }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -84,6 +123,51 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
             variant="danger"
             style={styles.accionButton}
           />
+        </View>
+      )}
+
+      {item.estado === 'rechazada' && citaEnReprogramacion !== item.id && (
+        <CustomButton
+          title="Reprogramar"
+          onPress={() => handleAbrirReprogramar(item.id)}
+          variant="secondary"
+          style={styles.reprogramarButton}
+        />
+      )}
+
+      {citaEnReprogramacion === item.id && (
+        <View style={styles.reprogramarBox}>
+          <CustomInput
+            label="Nueva fecha (DD/MM/AAAA)"
+            value={nuevaFecha}
+            onChangeText={setNuevaFecha}
+            validationType="text"
+            placeholder="28/08/2026"
+          />
+          <CustomInput
+            label="Nueva hora"
+            value={nuevaHora}
+            onChangeText={setNuevaHora}
+            validationType="text"
+            placeholder="09:00 AM"
+          />
+          {reprogramarError ? (
+            <Text style={styles.errorText}>{reprogramarError}</Text>
+          ) : null}
+          <View style={styles.accionesRow}>
+            <CustomButton
+              title="Confirmar nueva fecha"
+              onPress={() => handleConfirmarReprogramacion(item.id)}
+              variant="primary"
+              style={styles.accionButton}
+            />
+            <CustomButton
+              title="Cancelar"
+              onPress={handleCancelarReprogramar}
+              variant="secondary"
+              style={styles.accionButton}
+            />
+          </View>
         </View>
       )}
     </View>
@@ -179,6 +263,21 @@ const styles = StyleSheet.create({
   },
   accionButton: {
     flex: 1,
+  },
+  reprogramarButton: {
+    marginTop: 10,
+  },
+  reprogramarBox: {
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 10,
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   emptyText: {
     textAlign: 'center',

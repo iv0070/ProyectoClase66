@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from 'react-native';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import CustomButton from '../components/CustomButtom';
 
 type TipoPersona = 'nino' | 'adulto';
@@ -18,6 +20,12 @@ interface DocumentoScreenProps {
   };
 }
 
+const nombresMotivo: Record<Motivo, string> = {
+  trabajo: 'trabajo',
+  escuela: 'escuela',
+  universidad: 'universidad',
+};
+
 export default function DocumentoScreen({ navigation, route }: DocumentoScreenProps) {
   const datos = route?.params ?? {
     fecha: '27/08/2026',
@@ -29,6 +37,69 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
 
   const [tipoPersona, setTipoPersona] = useState<TipoPersona>('adulto');
   const [motivo, setMotivo] = useState<Motivo>('trabajo');
+  const [generando, setGenerando] = useState(false);
+
+  const compartirPdf = async (html: string) => {
+    try {
+      setGenerando(true);
+      const { uri } = await Print.printToFileAsync({ html });
+
+      const disponible = await Sharing.isAvailableAsync();
+      if (disponible) {
+        await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
+      } else {
+        Alert.alert('PDF generado', `El archivo se guardó en: ${uri}`);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo generar el PDF. Intenta de nuevo.');
+    } finally {
+      setGenerando(false);
+    }
+  };
+
+  const generarNotaMedica = () => {
+    const html = `
+      <html>
+        <body style="font-family: Helvetica; padding: 24px; color: #111827;">
+          <h1 style="font-size: 20px;">Nota Médica</h1>
+          <hr />
+          <p><strong>Fecha:</strong> ${datos.fecha}</p>
+          <p><strong>Hora:</strong> ${datos.hora}</p>
+          <p><strong>Síntomas:</strong> ${datos.sintomas}</p>
+          <p><strong>Diagnóstico:</strong> ${datos.diagnostico}</p>
+          <p><strong>Medicamento recetado:</strong> ${datos.medicamento}</p>
+          <br />
+          <p style="font-size: 12px; color: #6B7280;">
+            Documento generado por Sistema Hospitalario Móvil. Sin firma digital certificada.
+          </p>
+        </body>
+      </html>
+    `;
+    compartirPdf(html);
+  };
+
+  const generarConstancia = () => {
+    const html = `
+      <html>
+        <body style="font-family: Helvetica; padding: 24px; color: #111827;">
+          <h1 style="font-size: 20px;">Constancia Médica</h1>
+          <hr />
+          <p>
+            Se constata que el paciente
+            (${tipoPersona === 'nino' ? 'menor de edad' : 'adulto'})
+            fue atendido en consulta médica el día ${datos.fecha},
+            por lo cual se recomienda reposo justificado para efectos de
+            ${nombresMotivo[motivo]}.
+          </p>
+          <br /><br />
+          <p style="font-size: 12px; color: #6B7280;">
+            Documento generado por Sistema Hospitalario Móvil. Sin firma digital certificada.
+          </p>
+        </body>
+      </html>
+    `;
+    compartirPdf(html);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -42,6 +113,13 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
           <Text style={styles.line}>Síntomas: {datos.sintomas}</Text>
           <Text style={styles.line}>Diagnóstico: {datos.diagnostico}</Text>
           <Text style={styles.line}>Medicamento: {datos.medicamento}</Text>
+
+          <CustomButton
+            title={generando ? 'Generando...' : 'Generar PDF de nota médica'}
+            onPress={generarNotaMedica}
+            variant="primary"
+            style={styles.pdfButton}
+          />
         </View>
 
         <Text style={styles.sectionLabel}>Tipo de constancia</Text>
@@ -89,6 +167,13 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
             atendido en consulta médica el día {datos.fecha}, por lo cual se recomienda reposo
             justificado para efectos de {motivo}.
           </Text>
+
+          <CustomButton
+            title={generando ? 'Generando...' : 'Generar PDF de constancia'}
+            onPress={generarConstancia}
+            variant="primary"
+            style={styles.pdfButton}
+          />
         </View>
 
         <CustomButton
@@ -149,5 +234,8 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     flex: 1,
+  },
+  pdfButton: {
+    marginTop: 12,
   },
 });
