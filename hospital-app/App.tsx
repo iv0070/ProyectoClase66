@@ -1,6 +1,11 @@
 import React from 'react';
-import RootNavigator from './src/navigation/RootNavigatior';
+import { NavigationContainer } from '@react-navigation/native';
+import PatientTabs from './src/navigation/PatientTabs';
 
 export default function App() {
-  return <RootNavigator />;
+  return (
+    <NavigationContainer>
+      <PatientTabs />
+    </NavigationContainer>
+  );
 }
