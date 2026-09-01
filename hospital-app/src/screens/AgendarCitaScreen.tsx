@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { doctores } from '../data/mockData';
-import { Doctor } from '../types';
+import { doctores, citas, pacientes } from '../data/mockData';
+import { Doctor, Cita } from '../types';
 
 interface AgendarCitaScreenProps {
   navigation?: any;
+  route?: any;
 }
 
 const nombresEspecialidad: Record<string, string> = {
@@ -19,7 +20,15 @@ const nombresEspecialidad: Record<string, string> = {
   fisioterapia: 'Fisioterapia',
 };
 
-export default function AgendarCitaScreen({ navigation }: AgendarCitaScreenProps) {
+export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScreenProps) {
+  const pacienteIdParam = route?.params?.pacienteId;
+  const pacienteNombreParam = route?.params?.pacienteNombre;
+
+  // Si viene de Recepción (con un paciente elegido), se usa ese.
+  // Si no, se asume que el propio paciente está agendando su cita.
+  const pacienteId = pacienteIdParam ?? pacientes[0].id;
+  const pacienteNombre = pacienteNombreParam ?? pacientes[0].nombre;
+
   const [doctorSeleccionado, setDoctorSeleccionado] = useState<Doctor | null>(null);
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
@@ -38,13 +47,24 @@ export default function AgendarCitaScreen({ navigation }: AgendarCitaScreenProps
 
     setFormError('');
 
-    Alert.alert(
+    // Crear la cita y guardarla
+    const nuevaCita: Cita = {
+      id: `c${Date.now()}`,
+      pacienteId,
+      doctorId: doctorSeleccionado.id,
+      fecha,
+      hora,
+      estado: 'pendiente',
+    };
+    citas.push(nuevaCita);
+
+       Alert.alert(
       'Cita agendada',
-      `Tu cita con ${doctorSeleccionado.nombre} quedó en estado pendiente, esperando confirmación.`,
+      `La cita de ${pacienteNombre} con ${doctorSeleccionado.nombre} quedó en estado pendiente, esperando confirmación.`,
       [
         {
           text: 'OK',
-        onPress: () => navigation?.navigate('PacienteHome'),
+          onPress: () => navigation?.goBack(),
         },
       ]
     );
@@ -66,7 +86,7 @@ export default function AgendarCitaScreen({ navigation }: AgendarCitaScreenProps
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Agendar cita</Text>
-        <Text style={styles.subtitle}>Elige un doctor</Text>
+        <Text style={styles.subtitle}>Para {pacienteNombre} · Elige un doctor</Text>
 
         <FlatList
           data={doctores}

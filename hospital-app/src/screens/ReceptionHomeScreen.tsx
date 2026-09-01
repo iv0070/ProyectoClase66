@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
 import { pacientes as pacientesIniciales } from '../data/mockData';
@@ -17,11 +17,19 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
     p.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
+  const handleSeleccionarPaciente = (paciente: Paciente) => {
+    navigation?.navigate('AgendarCita', {
+      pacienteId: paciente.id,
+      pacienteNombre: paciente.nombre,
+    });
+  };
+
   const renderPaciente = ({ item }: { item: Paciente }) => (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => handleSeleccionarPaciente(item)}>
       <Text style={styles.nombre}>{item.nombre}</Text>
       <Text style={styles.detalle}>Edad: {item.edad} · Tel: {item.telefono}</Text>
-    </View>
+      <Text style={styles.accion}>Toca para agendar cita</Text>
+    </TouchableOpacity>
   );
 
   return (
@@ -103,6 +111,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#6B7280',
     marginTop: 4,
+  },
+  accion: {
+    fontSize: 12,
+    color: '#2563EB',
+    marginTop: 6,
+    fontWeight: '600',
   },
   emptyText: {
     textAlign: 'center',

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from 'react-n
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
 import { pacientes } from '../data/mockData';
+import { Paciente } from '../types';
 
 interface NuevoPacienteScreenProps {
   navigation?: any;
@@ -38,6 +39,18 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
     }
 
     setFormError('');
+
+    // Crear el paciente y guardarlo en el array
+    const nuevoPaciente: Paciente = {
+      id: `p${Date.now()}`,
+      nombre: nombre.trim(),
+      usuario: nombre.trim().toLowerCase().replace(/\s+/g, '.'),
+      contrasena: '123456',
+      edad: Number(edad),
+      telefono: telefono.trim(),
+      identidad: identidad.trim(),
+    };
+    pacientes.push(nuevoPaciente);
 
     Alert.alert(
       'Paciente creado',

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, FlatList } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { citas, pacientes, doctores } from '../data/mockData';
-import { Cita } from '../types';
+import { citas, pacientes, doctores, consultas } from '../data/mockData';
+import { Cita, Consulta } from '../types';
 
 interface NuevaConsultaScreenProps {
   navigation?: any;
@@ -54,6 +54,26 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
     }
 
     setFormError('');
+
+    // Crear la consulta y guardarla
+    const nuevaConsulta: Consulta = {
+      id: `con${Date.now()}`,
+      citaId: citaSeleccionada.id,
+      pacienteId: citaSeleccionada.pacienteId,
+      doctorId: doctorActual.id,
+      fecha,
+      hora,
+      sintomas,
+      diagnostico,
+      medicamento,
+    };
+    consultas.push(nuevaConsulta);
+
+    // Marcar la cita como completada
+    const citaEnArray = citas.find((c) => c.id === citaSeleccionada.id);
+    if (citaEnArray) {
+      citaEnArray.estado = 'completada';
+    }
 
     navigation?.navigate('Documento', {
       pacienteId: citaSeleccionada.pacienteId,

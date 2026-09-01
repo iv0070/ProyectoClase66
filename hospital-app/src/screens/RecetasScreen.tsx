@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { consultas, farmacias, pacientes } from '../data/mockData';
 import { Farmacia } from '../types';
@@ -15,6 +15,16 @@ export default function RecetasScreen() {
 
   const farmaciaHospital = farmacias.find((f) => f.nombre === 'Farmacia del Hospital');
   const otrasFarmacias = farmacias.filter((f) => f.nombre !== 'Farmacia del Hospital');
+
+  const handleConfirmarFarmacia = () => {
+    const farmacia = farmacias.find((f) => f.id === farmaciaSeleccionada);
+    if (!farmacia) return;
+
+    Alert.alert(
+      'Receta enviada',
+      `Tu receta fue enviada a ${farmacia.nombre}.\nDescuento por referido: ${farmacia.descuento}%.`
+    );
+  };
 
   function FarmaciaCard({ farmacia }: { farmacia: Farmacia }) {
     const seleccionada = farmaciaSeleccionada === farmacia.id;
@@ -54,7 +64,7 @@ export default function RecetasScreen() {
 
             <CustomButton
               title="Confirmar farmacia"
-              onPress={() => {}}
+              onPress={handleConfirmarFarmacia}
               disabled={!farmaciaSeleccionada}
               style={{ marginTop: 16 }}
             />

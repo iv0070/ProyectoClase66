@@ -70,14 +70,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
-  
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
   },
-
   cardFecha: { fontSize: 13, color: '#6B7280' },
   cardEspecialidad: {
     fontSize: 12,
@@ -85,7 +83,6 @@ const styles = StyleSheet.create({
     color: '#2563EB',
     textTransform: 'capitalize',
   },
-
   cardDoctor: { fontSize: 16, fontWeight: '600', color: '#111827', marginBottom: 10 },
   cardLabel: { fontSize: 12, color: '#9CA3AF', marginTop: 4 },
   cardTexto: { fontSize: 14, color: '#374151' },
