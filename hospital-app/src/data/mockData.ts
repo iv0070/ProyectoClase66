@@ -1,4 +1,4 @@
-import { Doctor, Paciente, Cita, Consulta, Farmacia } from '../types';
+import { Doctor, Paciente, Cita, Consulta, Farmacia, Recepcionista } from '../types';
 
 export const doctores: Doctor[] = [
   {
@@ -51,6 +51,15 @@ export const pacientes: Paciente[] = [
     edad: 8,
     telefono: '9234-2343',
     identidad: '0501-2018-00789',
+  },
+];
+
+export const recepcionistas: Recepcionista[] = [
+  {
+    id: 'r1',
+    nombre: 'Daniel Martinez',
+    usuario: 'daniel.martinez',
+    contrasena: '456123',
   },
 ];
 

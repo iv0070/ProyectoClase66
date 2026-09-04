@@ -30,6 +30,13 @@ export interface Paciente {
   identidad: string;
 }
 
+export interface Recepcionista {
+  id: string;
+  nombre: string;
+  usuario: string;
+  contrasena: string;
+}
+
 export interface Cita {
   id: string;
   pacienteId: string;
