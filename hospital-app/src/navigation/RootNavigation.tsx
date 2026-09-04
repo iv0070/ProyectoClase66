@@ -4,7 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/LoginScreen';
 import DoctorStackNavigator from './DoctorStackNavigator';
 import ReceptionStackNavigator from './ReceptionStackNavigator';
-import PatientTabs from './PatientTabs';
+import PatientTabs from './PatientStackNavigator';
+import PatientStackNavigator from './PatientStackNavigator';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -25,7 +26,7 @@ export default function RootNavigator() {
       >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="DoctorStack" component={DoctorStackNavigator} />
-        <Stack.Screen name="PatientTabs" component={PatientTabs} />
+        <Stack.Screen name="PatientTabs" component={PatientStackNavigator} />
         <Stack.Screen name="ReceptionStack" component={ReceptionStackNavigator} />
       </Stack.Navigator>
     </NavigationContainer>

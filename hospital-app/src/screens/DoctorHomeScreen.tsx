@@ -18,6 +18,7 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
   const [nuevaHora, setNuevaHora] = useState('');
   const [reprogramarError, setReprogramarError] = useState('');
 
+  
   const citasDelDoctor = citas.filter((c) => c.doctorId === doctorActual.id);
 
   const getNombrePaciente = (pacienteId: string) => {

@@ -11,6 +11,7 @@ const pacienteActual = pacientes[0];
 
 export default function PacienteHomeScreen({ navigation }: PacienteHomeScreenProps) {
   return (
+    //se saluda en una de las pantallas con el nombre real
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Hola, {pacienteActual.nombre}</Text>

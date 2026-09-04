@@ -15,7 +15,7 @@ function especialidadDoctor(doctorId: string): string {
   const doc = doctores.find((d) => d.id === doctorId);
   return doc ? doc.especialidad.replace('_', ' ') : '';
 }
-
+//dibuja una tarjeta de consulta
 function ConsultaCard({ consulta }: { consulta: Consulta }) {
   return (
     <View style={styles.card}>
@@ -40,7 +40,7 @@ export default function ConsultasScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Mis consultas</Text>
         <Text style={styles.subtitle}>Historial de {pacienteActual.nombre}</Text>
-
+//si no hay ninguna consulta me muestra el mensaje
         {misConsultas.length === 0 ? (
           <Text style={styles.vacio}>Aún no tienes consultas registradas.</Text>
         ) : (

@@ -6,8 +6,8 @@ import { doctores, citas, pacientes } from '../data/mockData';
 import { Doctor, Cita } from '../types';
 
 interface AgendarCitaScreenProps {
-  navigation?: any;
-  route?: any;
+  navigation?: any; //mover pantalla
+  route?: any;// traer los parametros
 }
 
 const nombresEspecialidad: Record<string, string> = {
@@ -21,19 +21,21 @@ const nombresEspecialidad: Record<string, string> = {
 };
 
 export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScreenProps) {
+  
   const pacienteIdParam = route?.params?.pacienteId;
   const pacienteNombreParam = route?.params?.pacienteNombre;
 
-  // Si viene de Recepción (con un paciente elegido), se usa ese.
-  // Si no, se asume que el propio paciente está agendando su cita.
+  // Si viene de Recepcion (con un paciente elegido), se usa ese.
+  // Si no, se asume que el propio paciente esta agendando su cita.
   const pacienteId = pacienteIdParam ?? pacientes[0].id;
   const pacienteNombre = pacienteNombreParam ?? pacientes[0].nombre;
 
   const [doctorSeleccionado, setDoctorSeleccionado] = useState<Doctor | null>(null);
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
-  const [formError, setFormError] = useState('');
+  const [formError, setFormError] = useState('');// un error en el formulario
 
+  //agendar citas
   const handleAgendar = () => {
     if (!doctorSeleccionado) {
       setFormError('Debes elegir un doctor');
@@ -56,6 +58,7 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
       hora,
       estado: 'pendiente',
     };
+    //agrega el nuevo objeto
     citas.push(nuevaCita);
 
        Alert.alert(
@@ -69,7 +72,7 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
       ]
     );
   };
-
+  // dibuja al dr. de la lista
   const renderDoctor = ({ item }: { item: Doctor }) => {
     const seleccionado = doctorSeleccionado?.id === item.id;
     return (
@@ -94,7 +97,7 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
           renderItem={renderDoctor}
           style={styles.doctorList}
         />
-
+//campos de texto reutilizables
         <CustomInput
           label="Fecha (DD/MM/AAAA)"
           value={fecha}
@@ -110,7 +113,7 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
           validationType="text"
           placeholder="09:00 AM"
         />
-
+//verificar error
         {formError ? <Text style={styles.errorText}>{formError}</Text> : null}
 
         <CustomButton
