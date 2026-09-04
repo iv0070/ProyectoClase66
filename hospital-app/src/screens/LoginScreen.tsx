@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { doctores, pacientes } from '../data/mockData';
+import { doctores, pacientes, recepcionistas } from '../data/mockData';
 
 type Role = 'doctor' | 'paciente' | 'recepcion';
 
@@ -48,8 +48,13 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     }
 
     if (rol === 'recepcion') {
-      // Recepción no tiene expediente propio como doctor/paciente,
-      // solo valida que haya usuario y contraseña (ya verificado arriba).
+      const recepcionistaValido = recepcionistas.find(
+        (r) => r.usuario === usuario && r.contrasena === contrasena
+      );
+      if (!recepcionistaValido) {
+        setLoginError('Usuario o contraseña incorrectos');
+        return;
+      }
       setLoginError('');
       navigation?.navigate('ReceptionStack');
       return;
@@ -62,6 +67,11 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
+        <Image
+          source={require('../../assets/icon.png')}
+          style={styles.logo}
+        />
+
         <Text style={styles.title}>Sistema Hospitalario</Text>
         <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
 
@@ -105,7 +115,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         />
 
         <Text style={styles.hintText}>
-          Prueba con: carla.mejia / 123456 (Doctor) · jose.martinez / 123456 (Paciente)
+          Prueba con: carla.mejia / 123456 (Doctor) · ashly.cruz / 123456 (Paciente) · daniel.martinez / 456123 (Recepción)
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -121,6 +131,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
     backgroundColor: '#F9FAFB',
+  },
+  logo: {
+    width: 90,
+    height: 90,
+    alignSelf: 'center',
+    marginBottom: 16,
+    borderRadius: 20,
   },
   title: {
     fontSize: 26,
