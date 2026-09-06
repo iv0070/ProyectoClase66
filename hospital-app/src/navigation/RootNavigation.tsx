@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/LoginScreen';
 import DoctorStackNavigator from './DoctorStackNavigator';
 import ReceptionStackNavigator from './ReceptionStackNavigator';
-import PatientTabs from './PatientStackNavigator';
 import PatientStackNavigator from './PatientStackNavigator';
 
 export type RootStackParamList = {

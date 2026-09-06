@@ -1,26 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { consultas, farmacias, pacientes } from '../data/mockData';
-import { Farmacia } from '../types';
+import { Farmacia, Consulta } from '../types';
 import CustomButton from '../components/CustomButtom';
-
 
 const pacienteActual = pacientes[0];
 
 export default function RecetasScreen() {
-  //guardo
   const [farmaciaSeleccionada, setFarmaciaSeleccionada] = useState<string | null>(null);
-// traigo las consultas del paciente
-  const misConsultas = consultas.filter((c) => c.pacienteId === pacienteActual.id);
-//la receta
+  const [misConsultas, setMisConsultas] = useState<Consulta[]>(() =>
+    consultas.filter((c) => c.pacienteId === pacienteActual.id)
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      setMisConsultas(consultas.filter((c) => c.pacienteId === pacienteActual.id));
+    }, [])
+  );
+
   const ultimaConsulta = misConsultas[misConsultas.length - 1];
 
-  //separo la farmacia del hospital con las farmacias de afuera
   const farmaciaHospital = farmacias.find((f) => f.nombre === 'Farmacia del Hospital');
   const otrasFarmacias = farmacias.filter((f) => f.nombre !== 'Farmacia del Hospital');
-  
-//confirmar constancia
+
   const handleConfirmarFarmacia = () => {
     const farmacia = farmacias.find((f) => f.id === farmaciaSeleccionada);
     if (!farmacia) return;
@@ -30,7 +34,7 @@ export default function RecetasScreen() {
       `Tu receta fue enviada a ${farmacia.nombre}.\nDescuento por referido: ${farmacia.descuento}%.`
     );
   };
-//tarjeta de famarcia
+
   function FarmaciaCard({ farmacia }: { farmacia: Farmacia }) {
     const seleccionada = farmaciaSeleccionada === farmacia.id;
     return (
@@ -81,7 +85,9 @@ export default function RecetasScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
+  safeArea: 
+  { flex: 1, 
+    backgroundColor: '#F9FAFB' },
   container: { flex: 1, padding: 20 },
   title: { fontSize: 24, fontWeight: '700', color: '#111827', marginBottom: 16 },
   subtitle: { fontSize: 14, fontWeight: '600', color: '#374151', marginTop: 16, marginBottom: 8 },

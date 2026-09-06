@@ -19,7 +19,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     if (usuario.trim() === '' || contrasena.trim() === '') {
       setLoginError('Debes ingresar usuario y contraseña');
       return;
-    }
+     }
 
     if (rol === 'doctor') {
       const doctorValido = doctores.find(
@@ -108,7 +108,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           style={styles.roleButton}
         />
         <CustomButton
-          title="Recepción"
+          title="Recepcion"
           onPress={() => handleLogin('recepcion')}
           variant="danger"
           style={styles.roleButton}
