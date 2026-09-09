@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image, TouchableOpacity } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
 import { doctores, pacientes, recepcionistas } from '../data/mockData';
@@ -117,6 +117,15 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         <Text style={styles.hintText}>
           Prueba con: carla.mejia / 123456 (Doctor) · ashly.cruz / 123456 (Paciente) · daniel.martinez / 456123 (Recepción)
         </Text>
+
+        <TouchableOpacity
+  onPress={() => navigation?.navigate('RegistroPaciente')}
+  style={styles.registroContainer}
+>
+  <Text style={styles.registroTexto}>
+    ¿No tienes una cuenta? <Text style={styles.registroLink}>Regístrate</Text>
+  </Text>
+</TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -174,4 +183,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 16,
   },
+
+  registroContainer: {
+  marginTop: 16,
+  alignItems: 'center',
+},
+registroTexto: {
+  fontSize: 14,
+  color: '#6B7280',
+},
+registroLink: {
+  color: '#2563EB',
+  fontWeight: '600',
+  textDecorationLine: 'underline',
+},
+
 });

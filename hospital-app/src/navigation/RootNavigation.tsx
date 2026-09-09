@@ -5,9 +5,12 @@ import LoginScreen from '../screens/LoginScreen';
 import DoctorStackNavigator from './DoctorStackNavigator';
 import ReceptionStackNavigator from './ReceptionStackNavigator';
 import PatientStackNavigator from './PatientStackNavigator';
+import RegistroPacienteScreen from '../screens/RegistroPacienteScreen';
+
 
 export type RootStackParamList = {
   Login: undefined;
+  RegistroPaciente: undefined;
   DoctorStack: undefined;
   PatientTabs: undefined;
   ReceptionStack: undefined;
@@ -24,6 +27,7 @@ export default function RootNavigator() {
         screenOptions={{ headerShown: false }}
       >
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="RegistroPaciente" component={RegistroPacienteScreen} />
         <Stack.Screen name="DoctorStack" component={DoctorStackNavigator} />
         <Stack.Screen name="PatientTabs" component={PatientStackNavigator} />
         <Stack.Screen name="ReceptionStack" component={ReceptionStackNavigator} />
