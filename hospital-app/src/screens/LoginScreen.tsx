@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image, TouchableOpacity } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { doctores, pacientes, recepcionistas } from '../data/mockData';
+import { doctores, recepcionistas } from '../data/mockData';
+import { supabase } from '../../lib/supabase';
 
-type Role = 'doctor' | 'paciente' | 'recepcion';
 
 interface LoginScreenProps {
   navigation?: any;
@@ -14,51 +14,69 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [cargando, setCargando] = useState(false);
 
-  const handleLogin = (rol: Role) => {
+  const handleLogin = async () => {
     if (usuario.trim() === '' || contrasena.trim() === '') {
       setLoginError('Debes ingresar usuario y contraseña');
       return;
-     }
+    }
 
-    if (rol === 'doctor') {
-      const doctorValido = doctores.find(
-        (d) => d.usuario === usuario && d.contrasena === contrasena
-      );
-      if (!doctorValido) {
+    setLoginError('');
+    setCargando(true);
+
+    // 1. Buscar el perfil en Supabase por el campo "usuario"
+    const { data: perfil, error: perfilError } = await supabase
+      .from('perfiles')
+      .select('email, rol')
+      .eq('usuario', usuario.trim())
+      .single();
+
+    if (perfil && !perfilError) {
+      // 2. Existe en Supabase: intentar login real con su correo
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: perfil.email,
+        password: contrasena,
+      });
+
+      setCargando(false);
+
+      if (authError) {
         setLoginError('Usuario o contraseña incorrectos');
         return;
       }
-      setLoginError('');
+
+      // 3. Login exitoso, navegar según el rol guardado en Supabase
+      if (perfil.rol === 'paciente') {
+        navigation?.reset({ index: 0, routes: [{ name: 'PatientTabs' }] });
+      } else if (perfil.rol === 'doctor') {
+        navigation?.reset({ index: 0, routes: [{ name: 'DoctorStack' }] });
+      } else if (perfil.rol === 'recepcion') {
+        navigation?.reset({ index: 0, routes: [{ name: 'ReceptionStack' }] });
+      }
+      return;
+    }
+
+    // 4. No existe en Supabase todavía: revisar el mock (temporal, para doctor/recepcion)
+    setCargando(false);
+
+    const doctorValido = doctores.find(
+      (d) => d.usuario === usuario && d.contrasena === contrasena
+    );
+    if (doctorValido) {
       navigation?.navigate('DoctorStack');
       return;
     }
 
-    if (rol === 'paciente') {
-      const pacienteValido = pacientes.find(
-        (p) => p.usuario === usuario && p.contrasena === contrasena
-      );
-      if (!pacienteValido) {
-        setLoginError('Usuario o contraseña incorrectos');
-        return;
-      }
-      setLoginError('');
-      navigation?.navigate('PatientTabs');
-      return;
-    }
-
-    if (rol === 'recepcion') {
-      const recepcionistaValido = recepcionistas.find(
-        (r) => r.usuario === usuario && r.contrasena === contrasena
-      );
-      if (!recepcionistaValido) {
-        setLoginError('Usuario o contraseña incorrectos');
-        return;
-      }
-      setLoginError('');
+    const recepcionistaValido = recepcionistas.find(
+      (r) => r.usuario === usuario && r.contrasena === contrasena
+    );
+    if (recepcionistaValido) {
       navigation?.navigate('ReceptionStack');
       return;
     }
+
+    setLoginError('Usuario o contraseña incorrectos');
   };
 
   return (
@@ -71,7 +89,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           source={require('../../assets/icon.png')}
           style={styles.logo}
         />
-
         <Text style={styles.title}>Sistema Hospitalario</Text>
         <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
 
@@ -81,6 +98,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           onChangeText={setUsuario}
           validationType="text"
           placeholder="tu.usuario"
+          autoCapitalize="none"
         />
 
         <CustomInput
@@ -93,109 +111,41 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
         {loginError ? <Text style={styles.errorText}>{loginError}</Text> : null}
 
-        <Text style={styles.roleLabel}>Entrar como:</Text>
-
         <CustomButton
-          title="Doctor"
-          onPress={() => handleLogin('doctor')}
+          title={cargando ? 'Ingresando...' : 'Iniciar sesión'}
+          onPress={handleLogin}
           variant="primary"
-          style={styles.roleButton}
+          disabled={cargando}
+          loading={cargando}
         />
-        <CustomButton
-          title="Paciente"
-          onPress={() => handleLogin('paciente')}
-          variant="secondary"
-          style={styles.roleButton}
-        />
-        <CustomButton
-          title="Recepcion"
-          onPress={() => handleLogin('recepcion')}
-          variant="danger"
-          style={styles.roleButton}
-        />
-
-        <Text style={styles.hintText}>
-          Prueba con: carla.mejia / 123456 (Doctor) · ashly.cruz / 123456 (Paciente) · daniel.martinez / 456123 (Recepción)
-        </Text>
 
         <TouchableOpacity
-  onPress={() => navigation?.navigate('RegistroPaciente')}
-  style={styles.registroContainer}
->
-  <Text style={styles.registroTexto}>
-    ¿No tienes una cuenta? <Text style={styles.registroLink}>Regístrate</Text>
-  </Text>
-</TouchableOpacity>
+          onPress={() => navigation?.navigate('RegistroPaciente')}
+          style={styles.registroContainer}
+          activeOpacity={0.5}
+        >
+          <Text style={styles.registroTexto}>
+            ¿No tienes una cuenta? <Text style={styles.registroLink}>Regístrate</Text>
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.hintText}>
+          Prueba con: carla.mejia / 123456 (Doctor) · daniel.martinez / 456123 (Recepción)
+        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#F9FAFB',
-  },
-  logo: {
-    width: 90,
-    height: 90,
-    alignSelf: 'center',
-    marginBottom: 16,
-    borderRadius: 20,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#111827',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6B7280',
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-  errorText: {
-    color: '#DC2626',
-    fontSize: 14,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  roleLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginTop: 12,
-    marginBottom: 10,
-  },
-  roleButton: {
-    marginBottom: 10,
-  },
-  hintText: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    textAlign: 'center',
-    marginTop: 16,
-  },
-
-  registroContainer: {
-  marginTop: 16,
-  alignItems: 'center',
-},
-registroTexto: {
-  fontSize: 14,
-  color: '#6B7280',
-},
-registroLink: {
-  color: '#2563EB',
-  fontWeight: '600',
-  textDecorationLine: 'underline',
-},
-
+  flex: { flex: 1 },
+  container: { flexGrow: 1, justifyContent: 'center', padding: 24, backgroundColor: '#F9FAFB' },
+  logo: { width: 90, height: 90, alignSelf: 'center', marginBottom: 16, borderRadius: 20 },
+  title: { fontSize: 26, fontWeight: '700', color: '#111827', textAlign: 'center', marginBottom: 4 },
+  subtitle: { fontSize: 15, color: '#6B7280', textAlign: 'center', marginBottom: 32 },
+  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
+  registroContainer: { marginTop: 16, alignItems: 'center' },
+  registroTexto: { fontSize: 14, color: '#6B7280' },
+  registroLink: { color: '#2563EB', fontWeight: '600', textDecorationLine: 'underline' },
+  hintText: { fontSize: 12, color: '#9CA3AF', textAlign: 'center', marginTop: 16 },
 });
