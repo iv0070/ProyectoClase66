@@ -70,7 +70,7 @@ export default function CustomInput({
           onBlur={handleBlur}
           secureTextEntry={esPassword && !mostrarContrasena}
           keyboardType={validationType === 'email' ? 'email-address' : 'default'}
-          autoCapitalize={validationType === 'email' ? 'none' : 'sentences'}
+          autoCapitalize={validationType === 'email' || validationType === 'password' ? 'none' : 'sentences'}
           placeholderTextColor="#9CA3AF"
           {...rest}
         />

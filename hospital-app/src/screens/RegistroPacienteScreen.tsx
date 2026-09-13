@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import {View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity,
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  TouchableOpacity,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomInput from '../components/CustomInput';
@@ -11,7 +19,7 @@ interface RegistroPacienteScreenProps {
   navigation?: any;
 }
 
-const TOTAL_PASOS = 3;
+const TOTAL_PASOS = 4;
 
 
 
@@ -37,6 +45,7 @@ function formatearFecha(fecha: Date): string {
   return `${dia}/${mes}/${anio}`;
 }
 
+// ---------- Indicador de progreso (puntos) ----------
 
 function IndicadorProgreso({ pasoActual }: { pasoActual: number }) {
   return (
@@ -60,23 +69,27 @@ function IndicadorProgreso({ pasoActual }: { pasoActual: number }) {
   );
 }
 
-
+// ---------- Componente principal ----------
 
 export default function RegistroPacienteScreen({ navigation }: RegistroPacienteScreenProps) {
   const [paso, setPaso] = useState(1);
 
-  
+  // Paso 1: Cuenta
   const [email, setEmail] = useState('');
   const [contrasena, setContrasena] = useState('');
 
-
+  // Paso 2: Datos personales
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState<Date | null>(null);
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
 
+  // Paso 3: Contacto
   const [telefono, setTelefono] = useState('');
   const [identidad, setIdentidad] = useState('');
+
+  // Paso 4: Términos
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
 
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
@@ -88,7 +101,6 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
     }
   };
 
-  
   const validarPasoActual = (): boolean => {
     if (paso === 1) {
       if (!email.trim() || !email.includes('@')) {
@@ -130,10 +142,17 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
         setError('El número de identidad es obligatorio');
         return false;
       }
-     if (!validarIdentidadHondurena(identidad)) {
-  setError(`Valor recibido: "${identidad}" (longitud: ${identidad.length})`);
-  return false;
-}
+      if (!validarIdentidadHondurena(identidad)) {
+        setError('La identidad debe tener el formato 0000-0000-00000');
+        return false;
+      }
+    }
+
+    if (paso === 4) {
+      if (!aceptaTerminos) {
+        setError('Debes aceptar los Términos y Condiciones para continuar');
+        return false;
+      }
     }
 
     setError('');
@@ -198,11 +217,13 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
       return;
     }
 
+  
     Alert.alert(
-      'Cuenta creada',
-      `Tu usuario es: ${usuario}\nGuárdalo para iniciar sesión.`,
-      [{ text: 'OK', onPress: () => navigation?.navigate('Login') }]
-    );
+  'Cuenta creada',
+  `Bienvenido, ${nombre.trim()}\n\nTu usuario es: ${usuario}\nGuárdalo para iniciar sesión.`,
+  [{ text: 'Continuar', onPress: () => navigation?.reset({ index: 0, routes: [{ name: 'PatientTabs' }] }) }]
+);
+    
   };
 
   return (
@@ -300,6 +321,35 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
           </>
         )}
 
+        {paso === 4 && (
+          <>
+            <Text style={styles.pasoTitulo}>Términos y condiciones</Text>
+            <View style={styles.terminosBox}>
+              <Text style={styles.terminosTexto}>
+                Este es un proyecto académico desarrollado con fines educativos.{'\n\n'}
+                La información que ingreses (nombre, identidad, datos de contacto) se
+                almacena únicamente para fines de demostración del sistema y no será
+                utilizada con propósitos comerciales ni compartida con terceros.{'\n\n'}
+                Al continuar, entiendes que esta aplicación es un prototipo y no
+                sustituye ningún sistema real de gestión hospitalaria.
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.checkboxContainer}
+              onPress={() => setAceptaTerminos(!aceptaTerminos)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, aceptaTerminos && styles.checkboxMarcado]}>
+                {aceptaTerminos && <Text style={styles.checkboxCheck}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxTexto}>
+                He leído y acepto los Términos y Condiciones y el Aviso de Privacidad
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
+
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <View style={styles.botonesFila}>
@@ -324,7 +374,7 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
               title={cargando ? 'Creando cuenta...' : 'Crear cuenta'}
               onPress={handleRegistro}
               variant="primary"
-              disabled={cargando}
+              disabled={cargando || !aceptaTerminos}
               loading={cargando}
               style={styles.botonMitad}
             />
@@ -387,6 +437,46 @@ const styles = StyleSheet.create({
   fechaTexto: { fontSize: 16, color: '#111827' },
   fechaPlaceholder: { fontSize: 16, color: '#9CA3AF' },
   edadCalculada: { fontSize: 13, color: '#2563EB', marginBottom: 16 },
+  terminosBox: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 16,
+  },
+  terminosTexto: {
+    fontSize: 13,
+    color: '#4B5563',
+    lineHeight: 19,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    borderRadius: 4,
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxMarcado: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
+  },
+  checkboxCheck: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  checkboxTexto: {
+    flex: 1,
+    fontSize: 14,
+    color: '#374151',
+  },
   errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
   botonesFila: {
     flexDirection: 'row',

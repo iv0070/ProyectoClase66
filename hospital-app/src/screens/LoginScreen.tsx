@@ -5,7 +5,6 @@ import CustomButton from '../components/CustomButtom';
 import { doctores, recepcionistas } from '../data/mockData';
 import { supabase } from '../../lib/supabase';
 
-
 interface LoginScreenProps {
   navigation?: any;
 }
@@ -28,7 +27,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     // 1. Buscar el perfil en Supabase por el campo "usuario"
     const { data: perfil, error: perfilError } = await supabase
       .from('perfiles')
-      .select('email, rol')
+      .select('email, rol, debe_cambiar_password')
       .eq('usuario', usuario.trim())
       .single();
 
@@ -50,9 +49,17 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       if (perfil.rol === 'paciente') {
         navigation?.reset({ index: 0, routes: [{ name: 'PatientTabs' }] });
       } else if (perfil.rol === 'doctor') {
-        navigation?.reset({ index: 0, routes: [{ name: 'DoctorStack' }] });
+        if (perfil.debe_cambiar_password) {
+          navigation?.navigate('CambiarPasswordObligatorio', { rolDestino: 'doctor' });
+        } else {
+          navigation?.reset({ index: 0, routes: [{ name: 'DoctorStack' }] });
+        }
       } else if (perfil.rol === 'recepcion') {
-        navigation?.reset({ index: 0, routes: [{ name: 'ReceptionStack' }] });
+        if (perfil.debe_cambiar_password) {
+          navigation?.navigate('CambiarPasswordObligatorio', { rolDestino: 'recepcion' });
+        } else {
+          navigation?.reset({ index: 0, routes: [{ name: 'ReceptionStack' }] });
+        }
       }
       return;
     }
@@ -130,7 +137,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         </TouchableOpacity>
 
         <Text style={styles.hintText}>
-          Prueba con: carla.mejia / 123456 (Doctor) · daniel.martinez / 456123 (Recepción)
+          Prueba con: carla.mejia / Temporal123 (Doctor) · daniel.martinez / Temporal123 (Recepción)
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
