@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import CustomButton from '../components/CustomButtom';
 import CustomInput from '../components/CustomInput';
-import { citas as citasIniciales, pacientes, doctores } from '../data/mockData';
+import { citas as citasIniciales, pacientes, doctores, doctorActualId } from '../data/mockData';
 import { Cita } from '../types';
 
 interface DoctorHomeScreenProps {
   navigation?: any;
 }
 
-const doctorActual = doctores[1];
+const doctorActual = doctores.find((d) => d.id === doctorActualId) ?? doctores[0];
 
 export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) {
   const [citas, setCitas] = useState<Cita[]>(citasIniciales);
@@ -18,7 +18,6 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
   const [nuevaHora, setNuevaHora] = useState('');
   const [reprogramarError, setReprogramarError] = useState('');
 
-  
   const citasDelDoctor = citas.filter((c) => c.doctorId === doctorActual.id);
 
   const getNombrePaciente = (pacienteId: string) => {
@@ -194,6 +193,25 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
           title="Nueva consulta"
           onPress={() => navigation?.navigate('NuevaConsulta')}
           variant="primary"
+        />
+        <CustomButton
+          title="Ver perfil"
+          onPress={() =>
+            navigation?.navigate('Perfil', {
+              rol: 'doctor',
+              nombre: doctorActual.nombre,
+              usuario: doctorActual.usuario,
+              especialidad: doctorActual.especialidad,
+            })
+          }
+          variant="secondary"
+          style={{ marginTop: 10 }}
+        />
+        <CustomButton
+          title="Cerrar sesión"
+          onPress={() => navigation?.navigate('Login')}
+          variant="danger"
+          style={{ marginTop: 10 }}
         />
       </View>
     </SafeAreaView>

@@ -50,8 +50,8 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
       } else {
         Alert.alert('PDF generado', `El archivo se guardó en: ${uri}`);
       }
-    } catch (error) {
-      Alert.alert('Error', 'No se pudo generar el PDF. Intenta de nuevo.');
+       } catch (error: any) {
+      Alert.alert('Error', `No se pudo generar el PDF: ${error?.message ?? String(error)}`);
     } finally {
       setGenerando(false);
     }

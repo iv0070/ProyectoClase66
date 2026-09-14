@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
 import { citas, pacientes, doctores, consultas } from '../data/mockData';
@@ -55,7 +55,6 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
 
     setFormError('');
 
-    // Crear la consulta y guardarla
     const nuevaConsulta: Consulta = {
       id: `con${Date.now()}`,
       citaId: citaSeleccionada.id,
@@ -69,7 +68,6 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
     };
     consultas.push(nuevaConsulta);
 
-    // Marcar la cita como completada
     const citaEnArray = citas.find((c) => c.id === citaSeleccionada.id);
     if (citaEnArray) {
       citaEnArray.estado = 'completada';
@@ -87,33 +85,30 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
     });
   };
 
-  const renderCitaOption = ({ item }: { item: Cita }) => {
-    const seleccionada = citaSeleccionada?.id === item.id;
-    return (
-      <CustomButton
-        title={`${getNombrePaciente(item.pacienteId)} · ${item.fecha} ${item.hora}`}
-        onPress={() => handleSeleccionarCita(item)}
-        variant={seleccionada ? 'primary' : 'secondary'}
-        style={styles.citaButton}
-      />
-    );
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Nueva consulta</Text>
         <Text style={styles.subtitle}>Elige el paciente (cita confirmada)</Text>
 
-        <FlatList
-          data={citasConfirmadas}
-          keyExtractor={(item) => item.id}
-          renderItem={renderCitaOption}
-          style={styles.citasList}
-          ListEmptyComponent={
+        <View style={styles.citasList}>
+          {citasConfirmadas.length === 0 ? (
             <Text style={styles.emptyText}>No tienes citas confirmadas por ahora</Text>
-          }
-        />
+          ) : (
+            citasConfirmadas.map((item) => {
+              const seleccionada = citaSeleccionada?.id === item.id;
+              return (
+                <CustomButton
+                  key={item.id}
+                  title={`${getNombrePaciente(item.pacienteId)} · ${item.fecha} ${item.hora}`}
+                  onPress={() => handleSeleccionarCita(item)}
+                  variant={seleccionada ? 'primary' : 'secondary'}
+                  style={styles.citaButton}
+                />
+              );
+            })
+          )}
+        </View>
 
         {citaSeleccionada && (
           <>
@@ -174,41 +169,12 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  container: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6B7280',
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  citasList: {
-    maxHeight: 160,
-    marginBottom: 16,
-  },
-  citaButton: {
-    marginBottom: 8,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#9CA3AF',
-    marginVertical: 12,
-  },
-  errorText: {
-    color: '#DC2626',
-    fontSize: 14,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
+  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flexGrow: 1, padding: 20 },
+  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
+  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 12 },
+  citasList: { marginBottom: 16 },
+  citaButton: { marginBottom: 8 },
+  emptyText: { textAlign: 'center', color: '#9CA3AF', marginVertical: 12 },
+  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
 });

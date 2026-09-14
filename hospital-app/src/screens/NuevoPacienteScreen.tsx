@@ -27,6 +27,12 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
       return;
     }
 
+    const partesNombre = nombre.trim().split(/\s+/);
+    if (partesNombre.length < 2) {
+      setFormError('Ingresa el nombre completo (nombre y apellido)');
+      return;
+    }
+
     if (isNaN(Number(edad))) {
       setFormError('La edad debe ser un número');
       return;
@@ -40,7 +46,6 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
 
     setFormError('');
 
-    // Crear el paciente y guardarlo en el array
     const nuevoPaciente: Paciente = {
       id: `p${Date.now()}`,
       nombre: nombre.trim(),

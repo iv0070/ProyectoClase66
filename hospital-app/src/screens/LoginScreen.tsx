@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { doctores, pacientes, recepcionistas } from '../data/mockData';
+import { doctores, pacientes, recepcionistas, setPacienteActual, setDoctorActual } from '../data/mockData';
 
 type Role = 'doctor' | 'paciente' | 'recepcion';
 
@@ -21,7 +21,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       return;
     }
 
-    if (rol === 'doctor') {
+      if (rol === 'doctor') {
       const doctorValido = doctores.find(
         (d) => d.usuario === usuario && d.contrasena === contrasena
       );
@@ -30,6 +30,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         return;
       }
       setLoginError('');
+      setDoctorActual(doctorValido.id);
       navigation?.navigate('DoctorStack');
       return;
     }
@@ -43,6 +44,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         return;
       }
       setLoginError('');
+      setPacienteActual(pacienteValido.id);
       navigation?.navigate('PatientTabs');
       return;
     }
@@ -113,10 +115,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           variant="danger"
           style={styles.roleButton}
         />
-
-        <Text style={styles.hintText}>
-          Prueba con: carla.mejia / 123456 (Doctor) · ashly.cruz / 123456 (Paciente) · daniel.martinez / 456123 (Recepción)
-        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -167,11 +165,5 @@ const styles = StyleSheet.create({
   },
   roleButton: {
     marginBottom: 10,
-  },
-  hintText: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    textAlign: 'center',
-    marginTop: 16,
   },
 });

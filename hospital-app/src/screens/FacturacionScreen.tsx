@@ -1,9 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { citas, doctores, pacientes, costosPorEspecialidad } from '../data/mockData';
+import { citas, doctores, pacientes, costosPorEspecialidad, pacienteActualId } from '../data/mockData';
 
-const pacienteActual = pacientes[0];
 const EDAD_TERCERA_EDAD = 60;
 const DESCUENTO_TERCERA_EDAD = 20;
 
@@ -18,6 +17,7 @@ function EstadoBadge({ label, activo }: { label: string; activo: boolean }) {
 }
 
 export default function FacturacionScreen() {
+  const pacienteActual = pacientes.find((p) => p.id === pacienteActualId) ?? pacientes[0];
   const misCitas = citas.filter((c) => c.pacienteId === pacienteActual.id);
   const citaActual = misCitas[misCitas.length - 1];
   const doctor = citaActual ? doctores.find((d) => d.id === citaActual.doctorId) : null;

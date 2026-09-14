@@ -1,26 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { consultas, farmacias, pacientes } from '../data/mockData';
+import { consultas, farmacias, pacientes, pacienteActualId } from '../data/mockData';
 import { Farmacia } from '../types';
 import CustomButton from '../components/CustomButtom';
 
-
-const pacienteActual = pacientes[0];
-
 export default function RecetasScreen() {
-  //guardo
+  const pacienteActual = pacientes.find((p) => p.id === pacienteActualId) ?? pacientes[0];
   const [farmaciaSeleccionada, setFarmaciaSeleccionada] = useState<string | null>(null);
-// traigo las consultas del paciente
+
   const misConsultas = consultas.filter((c) => c.pacienteId === pacienteActual.id);
-//la receta
   const ultimaConsulta = misConsultas[misConsultas.length - 1];
 
-  //separo la farmacia del hospital con las farmacias de afuera
   const farmaciaHospital = farmacias.find((f) => f.nombre === 'Farmacia del Hospital');
   const otrasFarmacias = farmacias.filter((f) => f.nombre !== 'Farmacia del Hospital');
-  
-//confirmar constancia
+
   const handleConfirmarFarmacia = () => {
     const farmacia = farmacias.find((f) => f.id === farmaciaSeleccionada);
     if (!farmacia) return;
@@ -30,7 +24,7 @@ export default function RecetasScreen() {
       `Tu receta fue enviada a ${farmacia.nombre}.\nDescuento por referido: ${farmacia.descuento}%.`
     );
   };
-//tarjeta de famarcia
+
   function FarmaciaCard({ farmacia }: { farmacia: Farmacia }) {
     const seleccionada = farmaciaSeleccionada === farmacia.id;
     return (
