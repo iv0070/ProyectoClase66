@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+<<<<<<< HEAD
 import { useFocusEffect } from '@react-navigation/native';
 import { consultas, farmacias, pacientes } from '../data/mockData';
 import { Farmacia, Consulta } from '../types';
@@ -20,6 +21,17 @@ export default function RecetasScreen() {
     }, [])
   );
 
+=======
+import { consultas, farmacias, pacientes, pacienteActualId } from '../data/mockData';
+import { Farmacia } from '../types';
+import CustomButton from '../components/CustomButtom';
+
+export default function RecetasScreen() {
+  const pacienteActual = pacientes.find((p) => p.id === pacienteActualId) ?? pacientes[0];
+  const [farmaciaSeleccionada, setFarmaciaSeleccionada] = useState<string | null>(null);
+
+  const misConsultas = consultas.filter((c) => c.pacienteId === pacienteActual.id);
+>>>>>>> origin/persona1-ashllycruz
   const ultimaConsulta = misConsultas[misConsultas.length - 1];
 
   const farmaciaHospital = farmacias.find((f) => f.nombre === 'Farmacia del Hospital');

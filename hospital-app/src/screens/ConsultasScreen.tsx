@@ -1,11 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+<<<<<<< HEAD
 import { useFocusEffect } from '@react-navigation/native';
 import { consultas, doctores, pacientes } from '../data/mockData';
+=======
+import { consultas, doctores, pacientes, pacienteActualId } from '../data/mockData';
+>>>>>>> origin/persona1-ashllycruz
 import { Consulta } from '../types';
-
-const pacienteActual = pacientes[0];
 
 function nombreDoctor(doctorId: string): string {
   const doc = doctores.find((d) => d.id === doctorId);
@@ -34,6 +36,7 @@ function ConsultaCard({ consulta }: { consulta: Consulta }) {
 }
 
 export default function ConsultasScreen() {
+<<<<<<< HEAD
   const [misConsultas, setMisConsultas] = useState<Consulta[]>(() =>
     consultas.filter((c) => c.pacienteId === pacienteActual.id)
   );
@@ -43,6 +46,10 @@ export default function ConsultasScreen() {
       setMisConsultas(consultas.filter((c) => c.pacienteId === pacienteActual.id));
     }, [])
   );
+=======
+  const pacienteActual = pacientes.find((p) => p.id === pacienteActualId) ?? pacientes[0];
+  const misConsultas = consultas.filter((c) => c.pacienteId === pacienteActual.id);
+>>>>>>> origin/persona1-ashllycruz
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -73,8 +80,12 @@ const styles = StyleSheet.create({
   { fontSize: 24, fontWeight: '700', color: '#111827', marginBottom: 4 },
   subtitle: { fontSize: 15, color: '#6B7280', marginBottom: 20 },
   vacio: { fontSize: 14, color: '#6B7280', textAlign: 'center', marginTop: 40 },
+<<<<<<< HEAD
   card: 
   { backgroundColor: '#fff', borderRadius: 10, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#E5E7EB' },
+=======
+  card: { backgroundColor: '#fff', borderRadius: 10, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#E5E7EB' },
+>>>>>>> origin/persona1-ashllycruz
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   cardFecha: { fontSize: 13, color: '#6B7280' },
   cardEspecialidad: { fontSize: 12, fontWeight: '600', color: '#2563EB', textTransform: 'capitalize' },

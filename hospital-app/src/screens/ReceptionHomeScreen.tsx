@@ -2,7 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { pacientes as pacientesIniciales, citas, consultas, doctores } from '../data/mockData';
+import {
+  pacientes as pacientesIniciales,
+  citas,
+  consultas,
+  doctores,
+  recepcionistas,
+} from '../data/mockData';
 import { Paciente } from '../types';
 
 interface ReceptionHomeScreenProps {
@@ -12,11 +18,13 @@ interface ReceptionHomeScreenProps {
 export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenProps) {
   const [busqueda, setBusqueda] = useState('');
   const [pacientes] = useState<Paciente[]>(pacientesIniciales);
-  // guarda el id del paciente que está expandido ahorita (o null si ninguno)
   const [pacienteExpandido, setPacienteExpandido] = useState<string | null>(null);
 
-  const resultados = pacientes.filter((p) =>
-    p.nombre.toLowerCase().includes(busqueda.toLowerCase())
+  // ahora busca tanto por nombre como por número de identidad
+  const resultados = pacientes.filter(
+    (p) =>
+      p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+      p.identidad.includes(busqueda)
   );
 
   const handleSeleccionarPaciente = (paciente: Paciente) => {
@@ -26,7 +34,6 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
     });
   };
 
-  // al tocar la tarjeta, expande/contrae el detalle en vez de navegar directo
   const handleToggleExpandir = (pacienteId: string) => {
     setPacienteExpandido((actual) => (actual === pacienteId ? null : pacienteId));
   };
@@ -39,12 +46,10 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
   const renderPaciente = ({ item }: { item: Paciente }) => {
     const expandido = pacienteExpandido === item.id;
 
-    // citas de este paciente que aun no se completaron
     const proximaCita = citas.find(
       (c) => c.pacienteId === item.id && (c.estado === 'pendiente' || c.estado === 'confirmada')
     );
 
-    // historial: todas las consultas ya hechas con este paciente
     const historial = consultas.filter((c) => c.pacienteId === item.id);
 
     return (
@@ -95,15 +100,15 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Recepción</Text>
-        <Text style={styles.subtitle}>Buscar paciente por nombre</Text>
+        <Text style={styles.subtitle}>Buscar paciente por nombre o identidad</Text>
 
         <CustomInput
-          label="Nombre del paciente"
+          label="Nombre o número de identidad"
           value={busqueda}
           onChangeText={setBusqueda}
           validationType="text"
           required={false}
-          placeholder="Escribe para buscar..."
+          placeholder="Escribe nombre o identidad..."
         />
 
         <FlatList
@@ -114,8 +119,8 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           ListEmptyComponent={
             <Text style={styles.emptyText}>
               {busqueda.trim() === ''
-                ? 'Escribe un nombre para buscar'
-                : 'No se encontró ningún paciente con ese nombre'}
+                ? 'Escribe un nombre o identidad para buscar'
+                : 'No se encontró ningún paciente con esos datos'}
             </Text>
           }
         />
@@ -124,6 +129,24 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           title="Crear paciente nuevo"
           onPress={() => navigation?.navigate('NuevoPaciente')}
           variant="primary"
+        />
+        <CustomButton
+          title="Ver perfil"
+          onPress={() =>
+            navigation?.navigate('Perfil', {
+              rol: 'recepcion',
+              nombre: recepcionistas[0].nombre,
+              usuario: recepcionistas[0].usuario,
+            })
+          }
+          variant="secondary"
+          style={{ marginTop: 10 }}
+        />
+        <CustomButton
+          title="Cerrar sesión"
+          onPress={() => navigation?.navigate('Login')}
+          variant="danger"
+          style={{ marginTop: 10 }}
         />
       </View>
     </SafeAreaView>
