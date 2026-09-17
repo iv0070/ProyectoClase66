@@ -7,26 +7,31 @@ import {
   citas,
   consultas,
   doctores,
-  recepcionistas,
 } from '../data/mockData';
 import { Paciente } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 interface ReceptionHomeScreenProps {
   navigation?: any;
 }
 
 export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenProps) {
+  // sacamos el logout del contexto, para cerrar sesion de verdad
+  const { logout } = useAuth();
+
   const [busqueda, setBusqueda] = useState('');
   const [pacientes] = useState<Paciente[]>(pacientesIniciales);
   const [pacienteExpandido, setPacienteExpandido] = useState<string | null>(null);
 
-  // ahora busca tanto por nombre como por número de identidad
+  // filtra la lista de pacientes buscando por nombre o por numero de identidad
   const resultados = pacientes.filter(
     (p) =>
       p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
       p.identidad.includes(busqueda)
   );
 
+  // cuando recepcion toca un paciente de la lista, lo manda a agendar cita
+  // ya pasandole el id y nombre de ese paciente
   const handleSeleccionarPaciente = (paciente: Paciente) => {
     navigation?.navigate('AgendarCita', {
       pacienteId: paciente.id,
@@ -34,22 +39,33 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
     });
   };
 
+  // abre o cierra el detalle de un paciente (como un acordeon)
   const handleToggleExpandir = (pacienteId: string) => {
     setPacienteExpandido((actual) => (actual === pacienteId ? null : pacienteId));
   };
 
+  // busca el nombre del doctor a partir de su id, para mostrarlo en el detalle
   const getNombreDoctor = (doctorId: string) => {
     const doc = doctores.find((d) => d.id === doctorId);
     return doc ? doc.nombre : 'Doctor desconocido';
   };
 
+  // cierra sesion de verdad (limpia el contexto) y regresa al login
+  const handleCerrarSesion = () => {
+    logout();
+    navigation?.navigate('Login');
+  };
+
+  // dibuja cada tarjeta de paciente en la lista
   const renderPaciente = ({ item }: { item: Paciente }) => {
     const expandido = pacienteExpandido === item.id;
 
+    // busca si el paciente tiene una cita pendiente o confirmada
     const proximaCita = citas.find(
       (c) => c.pacienteId === item.id && (c.estado === 'pendiente' || c.estado === 'confirmada')
     );
 
+    // saca todo el historial de consultas de ese paciente
     const historial = consultas.filter((c) => c.pacienteId === item.id);
 
     return (
@@ -62,9 +78,10 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           </Text>
         </TouchableOpacity>
 
+        {/* esto solo se muestra si el paciente esta expandido */}
         {expandido && (
           <View style={styles.detalleBox}>
-            <Text style={styles.detalleTitulo}>Próxima cita</Text>
+            <Text style={styles.detalleTitulo}>Proxima cita</Text>
             {proximaCita ? (
               <Text style={styles.detalleTexto}>
                 {proximaCita.fecha} · {proximaCita.hora} con {getNombreDoctor(proximaCita.doctorId)} ({proximaCita.estado})
@@ -75,7 +92,7 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
 
             <Text style={styles.detalleTitulo}>Historial de consultas</Text>
             {historial.length === 0 ? (
-              <Text style={styles.detalleVacio}>Aún no tiene consultas registradas</Text>
+              <Text style={styles.detalleVacio}>Aun no tiene consultas registradas</Text>
             ) : (
               historial.map((c) => (
                 <Text key={c.id} style={styles.detalleTexto}>
@@ -99,11 +116,11 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Recepción</Text>
+        <Text style={styles.title}>Recepcion</Text>
         <Text style={styles.subtitle}>Buscar paciente por nombre o identidad</Text>
 
         <CustomInput
-          label="Nombre o número de identidad"
+          label="Nombre o numero de identidad"
           value={busqueda}
           onChangeText={setBusqueda}
           validationType="text"
@@ -111,6 +128,7 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           placeholder="Escribe nombre o identidad..."
         />
 
+        {/* lista de pacientes que coinciden con la busqueda */}
         <FlatList
           data={resultados}
           keyExtractor={(item) => item.id}
@@ -120,7 +138,7 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
             <Text style={styles.emptyText}>
               {busqueda.trim() === ''
                 ? 'Escribe un nombre o identidad para buscar'
-                : 'No se encontró ningún paciente con esos datos'}
+                : 'No se encontro ningun paciente con esos datos'}
             </Text>
           }
         />
@@ -130,21 +148,17 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           onPress={() => navigation?.navigate('NuevoPaciente')}
           variant="primary"
         />
+
+        {/* ya no manda parametros, el perfil saca todo del AuthContext */}
         <CustomButton
           title="Ver perfil"
-          onPress={() =>
-            navigation?.navigate('Perfil', {
-              rol: 'recepcion',
-              nombre: recepcionistas[0].nombre,
-              usuario: recepcionistas[0].usuario,
-            })
-          }
+          onPress={() => navigation?.navigate('Perfil')}
           variant="secondary"
           style={{ marginTop: 10 }}
         />
         <CustomButton
-          title="Cerrar sesión"
-          onPress={() => navigation?.navigate('Login')}
+          title="Cerrar sesion"
+          onPress={handleCerrarSesion}
           variant="danger"
           style={{ marginTop: 10 }}
         />
