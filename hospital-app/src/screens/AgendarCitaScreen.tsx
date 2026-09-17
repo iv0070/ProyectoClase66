@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { doctores, citas, pacientes, pacienteActualId } from '../data/mockData';
+import { doctores, citas } from '../data/mockData';
 import { Doctor, Cita } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 interface AgendarCitaScreenProps {
   navigation?: any; //mover pantalla
@@ -21,15 +22,15 @@ const nombresEspecialidad: Record<string, string> = {
 };
 
 export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScreenProps) {
+  const { user } = useAuth();
 
   const pacienteIdParam = route?.params?.pacienteId;
   const pacienteNombreParam = route?.params?.pacienteNombre;
 
   // si viene de Recepcion (con un paciente elegido), se usa ese
-  // si no se usa el paciente que inicio sesion (pacienteActualId)
-  const pacienteActual = pacientes.find((p) => p.id === pacienteActualId) ?? pacientes[0];
-  const pacienteId = pacienteIdParam ?? pacienteActual.id;
-  const pacienteNombre = pacienteNombreParam ?? pacienteActual.nombre;
+  // si no, se usa el paciente que inicio sesion (user del AuthContext)
+  const pacienteId = pacienteIdParam ?? user?.id ?? '';
+  const pacienteNombre = pacienteNombreParam ?? user?.nombre ?? 'Paciente';
 
   const [doctorSeleccionado, setDoctorSeleccionado] = useState<Doctor | null>(null);
   const [fecha, setFecha] = useState('');

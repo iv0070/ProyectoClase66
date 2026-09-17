@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { doctores, pacientes, recepcionistas, setPacienteActual, setDoctorActual } from '../data/mockData';
+import { doctores, pacientes, recepcionistas } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
 
 type Role = 'doctor' | 'paciente' | 'recepcion';
 
@@ -11,6 +12,7 @@ interface LoginScreenProps {
 }
 
 export default function LoginScreen({ navigation }: LoginScreenProps) {
+  const { login } = useAuth();
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -21,7 +23,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       return;
     }
 
-      if (rol === 'doctor') {
+    if (rol === 'doctor') {
       const doctorValido = doctores.find(
         (d) => d.usuario === usuario && d.contrasena === contrasena
       );
@@ -30,7 +32,13 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         return;
       }
       setLoginError('');
-      setDoctorActual(doctorValido.id);
+      login({
+        rol: 'doctor',
+        id: doctorValido.id,
+        nombre: doctorValido.nombre,
+        usuario: doctorValido.usuario,
+        especialidad: doctorValido.especialidad,
+      });
       navigation?.navigate('DoctorStack');
       return;
     }
@@ -44,7 +52,14 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         return;
       }
       setLoginError('');
-      setPacienteActual(pacienteValido.id);
+      login({
+        rol: 'paciente',
+        id: pacienteValido.id,
+        nombre: pacienteValido.nombre,
+        usuario: pacienteValido.usuario,
+        edad: pacienteValido.edad,
+        telefono: pacienteValido.telefono,
+      });
       navigation?.navigate('PatientTabs');
       return;
     }
@@ -58,6 +73,12 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         return;
       }
       setLoginError('');
+      login({
+        rol: 'recepcion',
+        id: recepcionistaValido.id,
+        nombre: recepcionistaValido.nombre,
+        usuario: recepcionistaValido.usuario,
+      });
       navigation?.navigate('ReceptionStack');
       return;
     }
