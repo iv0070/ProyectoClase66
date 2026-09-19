@@ -1,10 +1,32 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { citas, doctores, pacientes, costosPorEspecialidad, pacienteActualId } from '../data/mockData';
+import { useFocusEffect } from '@react-navigation/native';
+import { supabase } from '../../lib/supabase';
 
 const EDAD_TERCERA_EDAD = 60;
 const DESCUENTO_TERCERA_EDAD = 20;
+
+const costosPorEspecialidad: Record<string, number> = {
+  odontologia: 450,
+  pediatria: 400,
+  ortopedia: 500,
+  cirugia: 800,
+  medicina_general: 350,
+  psicologia: 450,
+  fisioterapia: 400,
+};
+
+function calcularEdad(fechaNacimiento: string): number {
+  const nacimiento = new Date(fechaNacimiento);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - nacimiento.getFullYear();
+  const mes = hoy.getMonth() - nacimiento.getMonth();
+  if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+    edad--;
+  }
+  return edad;
+}
 
 function EstadoBadge({ label, activo }: { label: string; activo: boolean }) {
   return (
@@ -16,14 +38,66 @@ function EstadoBadge({ label, activo }: { label: string; activo: boolean }) {
   );
 }
 
-export default function FacturacionScreen() {
-  const pacienteActual = pacientes.find((p) => p.id === pacienteActualId) ?? pacientes[0];
-  const misCitas = citas.filter((c) => c.pacienteId === pacienteActual.id);
-  const citaActual = misCitas[misCitas.length - 1];
-  const doctor = citaActual ? doctores.find((d) => d.id === citaActual.doctorId) : null;
+interface CitaConDoctor {
+  id: string;
+  especialidad: string;
+}
 
-  const costoBase = doctor ? costosPorEspecialidad[doctor.especialidad] ?? 0 : 0;
-  const aplicaDescuento = pacienteActual.edad >= EDAD_TERCERA_EDAD;
+export default function FacturacionScreen() {
+  const [citaActual, setCitaActual] = useState<CitaConDoctor | null>(null);
+  const [edadPaciente, setEdadPaciente] = useState<number | null>(null);
+  const [cargando, setCargando] = useState(true);
+
+  const cargarFacturacion = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setCargando(false);
+      return;
+    }
+
+    // 1. Traer la fecha de nacimiento del paciente para calcular su edad
+    const { data: perfil } = await supabase
+      .from('perfiles')
+      .select('fecha_nacimiento')
+      .eq('id', user.id)
+      .single();
+
+    if (perfil?.fecha_nacimiento) {
+      setEdadPaciente(calcularEdad(perfil.fecha_nacimiento));
+    }
+
+    // 2. Traer la cita más reciente, con la especialidad del doctor
+    const { data, error } = await supabase
+      .from('citas')
+      .select(`
+        id,
+        doctor:perfiles!citas_doctor_id_fkey ( especialidad )
+      `)
+      .eq('paciente_id', user.id)
+      .order('fecha', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data) {
+      setCitaActual({
+        id: data.id,
+        especialidad: (data.doctor as any)?.especialidad ?? '',
+      });
+    } else {
+      setCitaActual(null);
+    }
+
+    setCargando(false);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      cargarFacturacion();
+    }, [cargarFacturacion])
+  );
+
+  const costoBase = citaActual ? costosPorEspecialidad[citaActual.especialidad] ?? 0 : 0;
+  const aplicaDescuento = (edadPaciente ?? 0) >= EDAD_TERCERA_EDAD;
   const costoFinal = aplicaDescuento
     ? costoBase * (1 - DESCUENTO_TERCERA_EDAD / 100)
     : costoBase;
@@ -33,12 +107,14 @@ export default function FacturacionScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Facturación</Text>
 
-        {!citaActual || !doctor ? (
+        {cargando ? (
+          <Text style={styles.vacio}>Cargando...</Text>
+        ) : !citaActual ? (
           <Text style={styles.vacio}>No hay ninguna consulta para facturar todavía.</Text>
         ) : (
           <View style={styles.card}>
             <View style={styles.filaEntre}>
-              <Text style={styles.especialidad}>{doctor.especialidad.replace('_', ' ')}</Text>
+              <Text style={styles.especialidad}>{citaActual.especialidad.replace('_', ' ')}</Text>
               <EstadoBadge label={aplicaDescuento ? 'Descuento aplicado' : 'Sin descuento'} activo={aplicaDescuento} />
             </View>
             <View style={styles.linea} />

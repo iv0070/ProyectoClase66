@@ -1,16 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { consultas, farmacias, pacientes, pacienteActualId } from '../data/mockData';
-import { Farmacia } from '../types';
+import { useFocusEffect } from '@react-navigation/native';
 import CustomButton from '../components/CustomButtom';
+import { supabase } from '../../lib/supabase';
+
+interface ConsultaReal {
+  id: string;
+  fecha: string;
+  hora: string;
+  diagnostico: string;
+  medicamento: string;
+}
+
+interface FarmaciaReal {
+  id: string;
+  nombre: string;
+  descuento: number;
+}
 
 export default function RecetasScreen() {
-  const pacienteActual = pacientes.find((p) => p.id === pacienteActualId) ?? pacientes[0];
   const [farmaciaSeleccionada, setFarmaciaSeleccionada] = useState<string | null>(null);
+  const [misConsultas, setMisConsultas] = useState<ConsultaReal[]>([]);
+  const [farmacias, setFarmacias] = useState<FarmaciaReal[]>([]);
+  const [cargando, setCargando] = useState(true);
 
-  const misConsultas = consultas.filter((c) => c.pacienteId === pacienteActual.id);
-  const ultimaConsulta = misConsultas[misConsultas.length - 1];
+  const cargarDatos = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setCargando(false);
+      return;
+    }
+
+    const [{ data: consultasData, error: consultasError }, { data: farmaciasData }] = await Promise.all([
+      supabase
+        .from('consultas')
+        .select('id, fecha, hora, diagnostico, medicamento')
+        .eq('paciente_id', user.id)
+        .order('fecha', { ascending: false }),
+      supabase.from('farmacias').select('id, nombre, descuento'),
+    ]);
+
+    if (!consultasError && consultasData) {
+      setMisConsultas(consultasData);
+    }
+    if (farmaciasData) {
+      setFarmacias(farmaciasData);
+    }
+    setCargando(false);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      cargarDatos();
+    }, [cargarDatos])
+  );
+
+  const ultimaConsulta = misConsultas[0];
 
   const farmaciaHospital = farmacias.find((f) => f.nombre === 'Farmacia del Hospital');
   const otrasFarmacias = farmacias.filter((f) => f.nombre !== 'Farmacia del Hospital');
@@ -25,7 +71,7 @@ export default function RecetasScreen() {
     );
   };
 
-  function FarmaciaCard({ farmacia }: { farmacia: Farmacia }) {
+  function FarmaciaCard({ farmacia }: { farmacia: FarmaciaReal }) {
     const seleccionada = farmaciaSeleccionada === farmacia.id;
     return (
       <TouchableOpacity
@@ -46,7 +92,9 @@ export default function RecetasScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Mi receta</Text>
 
-        {!ultimaConsulta ? (
+        {cargando ? (
+          <Text style={styles.vacio}>Cargando...</Text>
+        ) : !ultimaConsulta ? (
           <Text style={styles.vacio}>No tienes ninguna receta activa por ahora.</Text>
         ) : (
           <>
