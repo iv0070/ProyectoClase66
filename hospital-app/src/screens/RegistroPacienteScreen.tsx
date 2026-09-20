@@ -12,26 +12,13 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { supabase } from '../../lib/supabase';
-
+import { useAuth } from '../context/AuthContext';
 
 interface RegistroPacienteScreenProps {
   navigation?: any;
 }
 
 const TOTAL_PASOS = 4;
-
-
-
-function calcularEdad(fechaNacimiento: Date): number {
-  const hoy = new Date();
-  let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-  const mes = hoy.getMonth() - fechaNacimiento.getMonth();
-  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
-    edad--;
-  }
-  return edad;
-}
 
 function validarIdentidadHondurena(identidad: string): boolean {
   const formato = /^\d{4}-\d{4}-\d{5}$/;
@@ -45,7 +32,15 @@ function formatearFecha(fecha: Date): string {
   return `${dia}/${mes}/${anio}`;
 }
 
-// ---------- Indicador de progreso (puntos) ----------
+function calcularEdad(fechaNacimiento: Date): number {
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+  const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+    edad--;
+  }
+  return edad;
+}
 
 function IndicadorProgreso({ pasoActual }: { pasoActual: number }) {
   return (
@@ -57,11 +52,7 @@ function IndicadorProgreso({ pasoActual }: { pasoActual: number }) {
         return (
           <View
             key={numeroPaso}
-            style={[
-              styles.punto,
-              activo && styles.puntoActivo,
-              completado && styles.puntoCompletado,
-            ]}
+            style={[styles.punto, activo && styles.puntoActivo, completado && styles.puntoCompletado]}
           />
         );
       })}
@@ -69,26 +60,21 @@ function IndicadorProgreso({ pasoActual }: { pasoActual: number }) {
   );
 }
 
-// ---------- Componente principal ----------
-
 export default function RegistroPacienteScreen({ navigation }: RegistroPacienteScreenProps) {
+  const { register } = useAuth();
   const [paso, setPaso] = useState(1);
 
-  // Paso 1: Cuenta
   const [email, setEmail] = useState('');
   const [contrasena, setContrasena] = useState('');
 
-  // Paso 2: Datos personales
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState<Date | null>(null);
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
 
-  // Paso 3: Contacto
   const [telefono, setTelefono] = useState('');
   const [identidad, setIdentidad] = useState('');
 
-  // Paso 4: Términos
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
 
   const [error, setError] = useState('');
@@ -107,10 +93,6 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
         setError('Ingresa un correo electrónico válido');
         return false;
       }
-      if (!contrasena.trim()) {
-        setError('La contraseña es obligatoria');
-        return false;
-      }
       if (contrasena.length < 6) {
         setError('La contraseña debe tener al menos 6 caracteres');
         return false;
@@ -118,31 +100,18 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
     }
 
     if (paso === 2) {
-      if (!nombre.trim()) {
-        setError('El nombre es obligatorio');
-        return false;
-      }
-      if (!apellido.trim()) {
-        setError('El apellido es obligatorio');
+      if (!nombre.trim() || !apellido.trim()) {
+        setError('Nombre y apellido son obligatorios');
         return false;
       }
       if (!fechaNacimiento) {
         setError('Selecciona tu fecha de nacimiento');
         return false;
       }
-      const edad = calcularEdad(fechaNacimiento);
-      if (edad < 0 || edad > 120) {
-        setError('La fecha de nacimiento no es válida');
-        return false;
-      }
     }
 
     if (paso === 3) {
-      if (!identidad.trim()) {
-        setError('El número de identidad es obligatorio');
-        return false;
-      }
-      if (!validarIdentidadHondurena(identidad)) {
+      if (!identidad.trim() || !validarIdentidadHondurena(identidad)) {
         setError('La identidad debe tener el formato 0000-0000-00000');
         return false;
       }
@@ -174,63 +143,32 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
 
     setCargando(true);
 
-    const usuario = `${nombre.trim().toLowerCase()}.${apellido.trim().toLowerCase()}`;
-
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password: contrasena,
-    });
-
-    if (authError) {
-      setCargando(false);
-      if (authError.message.includes('already registered') || authError.message.includes('already been registered')) {
-        setError('Ya existe una cuenta registrada con este correo. Inicia sesión en su lugar.');
-      } else if (authError.message.includes('Password')) {
-        setError('La contraseña no cumple los requisitos mínimos de seguridad.');
-      } else {
-        setError('No se pudo crear la cuenta: ' + authError.message);
-      }
-      return;
-    }
-
-    if (!authData.user) {
-      setCargando(false);
-      setError('No se pudo crear la cuenta, intenta de nuevo');
-      return;
-    }
-
-    const { error: perfilError } = await supabase.from('perfiles').insert({
-      id: authData.user.id,
-      rol: 'paciente',
-      usuario,
-      email: email.trim(),
-      nombre: `${nombre.trim()} ${apellido.trim()}`,
-      telefono: telefono.trim() || null,
-      fecha_nacimiento: fechaNacimiento!.toISOString().split('T')[0],
-      identidad: identidad.trim(),
+    const resultado = await register({
+      nombre,
+      apellido,
+      email,
+      contrasena,
+      fechaNacimiento: fechaNacimiento!.toISOString().split('T')[0],
+      telefono,
+      identidad,
     });
 
     setCargando(false);
 
-    if (perfilError) {
-      setError('La cuenta se creó pero hubo un error guardando el perfil: ' + perfilError.message);
+    if (!resultado.exito) {
+      setError(resultado.error ?? 'No se pudo crear la cuenta');
       return;
     }
 
-  
     Alert.alert(
-  'Cuenta creada',
-  `Bienvenido, ${nombre.trim()}\n\nTu usuario es: ${usuario}\nGuárdalo para iniciar sesión.`,
-  [{ text: 'Continuar', onPress: () => navigation?.reset({ index: 0, routes: [{ name: 'PatientTabs' }] }) }]
-);
-    
+      'Cuenta creada',
+      `Bienvenido, ${nombre.trim()}\n\nTu usuario es: ${nombre.trim().toLowerCase()}.${apellido.trim().toLowerCase()}\nGuárdalo para iniciar sesión.`,
+      [{ text: 'Continuar', onPress: () => navigation?.reset({ index: 0, routes: [{ name: 'PatientTabs' }] }) }]
+    );
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Crear cuenta de paciente</Text>
         <IndicadorProgreso pasoActual={paso} />
@@ -238,46 +176,19 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
         {paso === 1 && (
           <>
             <Text style={styles.pasoTitulo}>Tu cuenta</Text>
-            <CustomInput
-              label="Correo electrónico"
-              value={email}
-              onChangeText={setEmail}
-              validationType="email"
-              placeholder="tucorreo@ejemplo.com"
-            />
-            <CustomInput
-              label="Contraseña"
-              value={contrasena}
-              onChangeText={setContrasena}
-              validationType="password"
-              placeholder="••••••••"
-            />
+            <CustomInput label="Correo electrónico" value={email} onChangeText={setEmail} validationType="email" placeholder="tucorreo@ejemplo.com" />
+            <CustomInput label="Contraseña" value={contrasena} onChangeText={setContrasena} validationType="password" placeholder="••••••••" />
           </>
         )}
 
         {paso === 2 && (
           <>
             <Text style={styles.pasoTitulo}>Datos personales</Text>
-            <CustomInput
-              label="Nombre"
-              value={nombre}
-              onChangeText={setNombre}
-              validationType="text"
-              placeholder="Ashly"
-            />
-            <CustomInput
-              label="Apellido"
-              value={apellido}
-              onChangeText={setApellido}
-              validationType="text"
-              placeholder="Cruz"
-            />
+            <CustomInput label="Nombre" value={nombre} onChangeText={setNombre} validationType="text" placeholder="Ashly" />
+            <CustomInput label="Apellido" value={apellido} onChangeText={setApellido} validationType="text" placeholder="Cruz" />
 
             <Text style={styles.label}>Fecha de nacimiento</Text>
-            <TouchableOpacity
-              style={styles.fechaBoton}
-              onPress={() => setMostrarCalendario(true)}
-            >
+            <TouchableOpacity style={styles.fechaBoton} onPress={() => setMostrarCalendario(true)}>
               <Text style={fechaNacimiento ? styles.fechaTexto : styles.fechaPlaceholder}>
                 {fechaNacimiento ? formatearFecha(fechaNacimiento) : 'Toca para elegir una fecha'}
               </Text>
@@ -294,9 +205,7 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
             )}
 
             {fechaNacimiento && (
-              <Text style={styles.edadCalculada}>
-                Edad: {calcularEdad(fechaNacimiento)} años
-              </Text>
+              <Text style={styles.edadCalculada}>Edad: {calcularEdad(fechaNacimiento)} años</Text>
             )}
           </>
         )}
@@ -304,20 +213,8 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
         {paso === 3 && (
           <>
             <Text style={styles.pasoTitulo}>Contacto</Text>
-            <CustomInput
-              label="Teléfono"
-              value={telefono}
-              onChangeText={setTelefono}
-              validationType="text"
-              placeholder="3315-5249"
-            />
-            <CustomInput
-              label="Número de identidad"
-              value={identidad}
-              onChangeText={setIdentidad}
-              validationType="text"
-              placeholder="0501-1992-00123"
-            />
+            <CustomInput label="Teléfono" value={telefono} onChangeText={setTelefono} validationType="text" placeholder="3315-5249" />
+            <CustomInput label="Número de identidad" value={identidad} onChangeText={setIdentidad} validationType="text" placeholder="0501-1992-00123" />
           </>
         )}
 
@@ -327,25 +224,17 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
             <View style={styles.terminosBox}>
               <Text style={styles.terminosTexto}>
                 Este es un proyecto académico desarrollado con fines educativos.{'\n\n'}
-                La información que ingreses (nombre, identidad, datos de contacto) se
-                almacena únicamente para fines de demostración del sistema y no será
-                utilizada con propósitos comerciales ni compartida con terceros.{'\n\n'}
-                Al continuar, entiendes que esta aplicación es un prototipo y no
-                sustituye ningún sistema real de gestión hospitalaria.
+                La información que ingreses se almacena únicamente para fines de
+                demostración del sistema y no será utilizada con propósitos comerciales
+                ni compartida con terceros.
               </Text>
             </View>
 
-            <TouchableOpacity
-              style={styles.checkboxContainer}
-              onPress={() => setAceptaTerminos(!aceptaTerminos)}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity style={styles.checkboxContainer} onPress={() => setAceptaTerminos(!aceptaTerminos)} activeOpacity={0.7}>
               <View style={[styles.checkbox, aceptaTerminos && styles.checkboxMarcado]}>
                 {aceptaTerminos && <Text style={styles.checkboxCheck}>✓</Text>}
               </View>
-              <Text style={styles.checkboxTexto}>
-                He leído y acepto los Términos y Condiciones y el Aviso de Privacidad
-              </Text>
+              <Text style={styles.checkboxTexto}>He leído y acepto los Términos y Condiciones y el Aviso de Privacidad</Text>
             </TouchableOpacity>
           </>
         )}
@@ -353,22 +242,10 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <View style={styles.botonesFila}>
-          {paso > 1 && (
-            <CustomButton
-              title="Atrás"
-              onPress={handleAtras}
-              variant="secondary"
-              style={styles.botonMitad}
-            />
-          )}
+          {paso > 1 && <CustomButton title="Atrás" onPress={handleAtras} variant="secondary" style={styles.botonMitad} />}
 
           {paso < TOTAL_PASOS ? (
-            <CustomButton
-              title="Siguiente"
-              onPress={handleSiguiente}
-              variant="primary"
-              style={paso > 1 ? styles.botonMitad : styles.botonCompleto}
-            />
+            <CustomButton title="Siguiente" onPress={handleSiguiente} variant="primary" style={paso > 1 ? styles.botonMitad : styles.botonCompleto} />
           ) : (
             <CustomButton
               title={cargando ? 'Creando cuenta...' : 'Crear cuenta'}
@@ -382,14 +259,8 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
         </View>
 
         {paso === 1 && (
-          <TouchableOpacity
-            onPress={() => navigation?.navigate('Login')}
-            style={styles.loginContainer}
-            activeOpacity={0.5}
-          >
-            <Text style={styles.loginTexto}>
-              ¿Ya tienes una cuenta? <Text style={styles.loginLink}>Inicia sesión</Text>
-            </Text>
+          <TouchableOpacity onPress={() => navigation?.navigate('Login')} style={styles.loginContainer} activeOpacity={0.5}>
+            <Text style={styles.loginTexto}>¿Ya tienes una cuenta? <Text style={styles.loginLink}>Inicia sesión</Text></Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -402,87 +273,24 @@ const styles = StyleSheet.create({
   container: { flexGrow: 1, justifyContent: 'center', padding: 24, backgroundColor: '#F9FAFB' },
   title: { fontSize: 24, fontWeight: '700', color: '#111827', textAlign: 'center', marginBottom: 16 },
   pasoTitulo: { fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 16 },
-  puntosContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 28,
-  },
-  punto: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#E5E7EB',
-    marginHorizontal: 5,
-  },
-  puntoActivo: {
-    backgroundColor: '#2563EB',
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  puntoCompletado: {
-    backgroundColor: '#93C5FD',
-  },
+  puntosContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 28 },
+  punto: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#E5E7EB', marginHorizontal: 5 },
+  puntoActivo: { backgroundColor: '#2563EB', width: 12, height: 12, borderRadius: 6 },
+  puntoCompletado: { backgroundColor: '#93C5FD' },
   label: { fontSize: 14, fontWeight: '500', marginBottom: 6, color: '#374151' },
-  fechaBoton: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-    marginBottom: 8,
-  },
+  fechaBoton: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: '#fff', marginBottom: 8 },
   fechaTexto: { fontSize: 16, color: '#111827' },
   fechaPlaceholder: { fontSize: 16, color: '#9CA3AF' },
   edadCalculada: { fontSize: 13, color: '#2563EB', marginBottom: 16 },
-  terminosBox: {
-    backgroundColor: '#F3F4F6',
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 16,
-  },
-  terminosTexto: {
-    fontSize: 13,
-    color: '#4B5563',
-    lineHeight: 19,
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 20,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderRadius: 4,
-    marginRight: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxMarcado: {
-    backgroundColor: '#2563EB',
-    borderColor: '#2563EB',
-  },
-  checkboxCheck: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  checkboxTexto: {
-    flex: 1,
-    fontSize: 14,
-    color: '#374151',
-  },
+  terminosBox: { backgroundColor: '#F3F4F6', borderRadius: 8, padding: 14, marginBottom: 16 },
+  terminosTexto: { fontSize: 13, color: '#4B5563', lineHeight: 19 },
+  checkboxContainer: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 20 },
+  checkbox: { width: 22, height: 22, borderWidth: 2, borderColor: '#D1D5DB', borderRadius: 4, marginRight: 10, justifyContent: 'center', alignItems: 'center' },
+  checkboxMarcado: { backgroundColor: '#2563EB', borderColor: '#2563EB' },
+  checkboxCheck: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  checkboxTexto: { flex: 1, fontSize: 14, color: '#374151' },
   errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
-  botonesFila: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
+  botonesFila: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
   botonMitad: { flex: 1 },
   botonCompleto: { flex: 1 },
   loginContainer: { marginTop: 16, alignItems: 'center' },

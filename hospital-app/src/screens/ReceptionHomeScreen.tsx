@@ -1,104 +1,168 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import {
-  pacientes as pacientesIniciales,
-  citas,
-  consultas,
-  doctores,
-} from '../data/mockData';
-import { Paciente } from '../types';
+import { supabase } from '../../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
 interface ReceptionHomeScreenProps {
   navigation?: any;
 }
 
+interface PacienteReal {
+  id: string;
+  nombre: string;
+  telefono: string | null;
+  identidad: string | null;
+}
+
+interface CitaReal {
+  id: string;
+  fecha: string;
+  hora: string;
+  estado: string;
+  doctor_nombre: string;
+}
+
+interface ConsultaReal {
+  id: string;
+  fecha: string;
+  diagnostico: string;
+}
+
 export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenProps) {
-  // sacamos el logout del contexto, para cerrar sesion de verdad
   const { logout } = useAuth();
-
   const [busqueda, setBusqueda] = useState('');
-  const [pacientes] = useState<Paciente[]>(pacientesIniciales);
+  const [resultados, setResultados] = useState<PacienteReal[]>([]);
+  const [buscando, setBuscando] = useState(false);
   const [pacienteExpandido, setPacienteExpandido] = useState<string | null>(null);
+  const [proximaCita, setProximaCita] = useState<CitaReal | null>(null);
+  const [historial, setHistorial] = useState<ConsultaReal[]>([]);
+  const [cargandoDetalle, setCargandoDetalle] = useState(false);
 
-  // filtra la lista de pacientes buscando por nombre o por numero de identidad
-  const resultados = pacientes.filter(
-    (p) =>
-      p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      p.identidad.includes(busqueda)
-  );
+  const handleBuscar = async (texto: string) => {
+    setBusqueda(texto);
 
-  // cuando recepcion toca un paciente de la lista, lo manda a agendar cita
-  // ya pasandole el id y nombre de ese paciente
-  const handleSeleccionarPaciente = (paciente: Paciente) => {
+    if (texto.trim() === '') {
+      setResultados([]);
+      return;
+    }
+
+    setBuscando(true);
+
+    const { data, error } = await supabase
+      .from('perfiles')
+      .select('id, nombre, telefono, identidad')
+      .eq('rol', 'paciente')
+      .or(`nombre.ilike.%${texto}%,identidad.ilike.%${texto}%`);
+
+    if (!error && data) {
+      setResultados(data);
+    }
+    setBuscando(false);
+  };
+
+  const cargarDetallePaciente = async (pacienteId: string) => {
+    setCargandoDetalle(true);
+
+    const { data: citaData } = await supabase
+      .from('citas')
+      .select(`
+        id, fecha, hora, estado,
+        doctor:perfiles!citas_doctor_id_fkey ( nombre )
+      `)
+      .eq('paciente_id', pacienteId)
+      .in('estado', ['pendiente', 'confirmada'])
+      .order('fecha', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (citaData) {
+      setProximaCita({
+        id: citaData.id,
+        fecha: citaData.fecha,
+        hora: citaData.hora,
+        estado: citaData.estado,
+        doctor_nombre: (citaData.doctor as any)?.nombre ?? 'Doctor desconocido',
+      });
+    } else {
+      setProximaCita(null);
+    }
+
+    const { data: consultasData } = await supabase
+      .from('consultas')
+      .select('id, fecha, diagnostico')
+      .eq('paciente_id', pacienteId)
+      .order('fecha', { ascending: false });
+
+    setHistorial(consultasData ?? []);
+    setCargandoDetalle(false);
+  };
+
+  const handleToggleExpandir = (pacienteId: string) => {
+    if (pacienteExpandido === pacienteId) {
+      setPacienteExpandido(null);
+      return;
+    }
+    setPacienteExpandido(pacienteId);
+    cargarDetallePaciente(pacienteId);
+  };
+
+  const handleSeleccionarPaciente = (paciente: PacienteReal) => {
     navigation?.navigate('AgendarCita', {
       pacienteId: paciente.id,
       pacienteNombre: paciente.nombre,
     });
   };
 
-  // abre o cierra el detalle de un paciente (como un acordeon)
-  const handleToggleExpandir = (pacienteId: string) => {
-    setPacienteExpandido((actual) => (actual === pacienteId ? null : pacienteId));
-  };
-
-  // busca el nombre del doctor a partir de su id, para mostrarlo en el detalle
-  const getNombreDoctor = (doctorId: string) => {
-    const doc = doctores.find((d) => d.id === doctorId);
-    return doc ? doc.nombre : 'Doctor desconocido';
-  };
-
-  // cierra sesion de verdad (limpia el contexto) y regresa al login
-  const handleCerrarSesion = () => {
+  const handleCerrarSesion = async () => {
+    await supabase.auth.signOut();
     logout();
-    navigation?.navigate('Login');
+    navigation?.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
-  // dibuja cada tarjeta de paciente en la lista
-  const renderPaciente = ({ item }: { item: Paciente }) => {
+  const renderPaciente = ({ item }: { item: PacienteReal }) => {
     const expandido = pacienteExpandido === item.id;
-
-    // busca si el paciente tiene una cita pendiente o confirmada
-    const proximaCita = citas.find(
-      (c) => c.pacienteId === item.id && (c.estado === 'pendiente' || c.estado === 'confirmada')
-    );
-
-    // saca todo el historial de consultas de ese paciente
-    const historial = consultas.filter((c) => c.pacienteId === item.id);
 
     return (
       <View style={styles.card}>
         <TouchableOpacity onPress={() => handleToggleExpandir(item.id)}>
           <Text style={styles.nombre}>{item.nombre}</Text>
-          <Text style={styles.detalle}>Edad: {item.edad} · Tel: {item.telefono}</Text>
+          <Text style={styles.detalle}>
+            Tel: {item.telefono ?? 'N/D'} · ID: {item.identidad ?? 'N/D'}
+          </Text>
           <Text style={styles.accion}>
             {expandido ? 'Toca para ocultar detalle' : 'Toca para ver detalle'}
           </Text>
         </TouchableOpacity>
 
-        {/* esto solo se muestra si el paciente esta expandido */}
         {expandido && (
           <View style={styles.detalleBox}>
-            <Text style={styles.detalleTitulo}>Proxima cita</Text>
-            {proximaCita ? (
-              <Text style={styles.detalleTexto}>
-                {proximaCita.fecha} · {proximaCita.hora} con {getNombreDoctor(proximaCita.doctorId)} ({proximaCita.estado})
-              </Text>
+            {cargandoDetalle ? (
+              <Text style={styles.detalleVacio}>Cargando...</Text>
             ) : (
-              <Text style={styles.detalleVacio}>No tiene ninguna cita pendiente</Text>
-            )}
+              <>
+                <Text style={styles.detalleTitulo}>Próxima cita</Text>
+                {proximaCita ? (
+                  <Text style={styles.detalleTexto}>
+                    {proximaCita.fecha} · {proximaCita.hora} con {proximaCita.doctor_nombre} ({proximaCita.estado})
+                  </Text>
+                ) : (
+                  <Text style={styles.detalleVacio}>No tiene ninguna cita pendiente</Text>
+                )}
 
-            <Text style={styles.detalleTitulo}>Historial de consultas</Text>
-            {historial.length === 0 ? (
-              <Text style={styles.detalleVacio}>Aun no tiene consultas registradas</Text>
-            ) : (
-              historial.map((c) => (
-                <Text key={c.id} style={styles.detalleTexto}>
-                  {c.fecha} · {c.diagnostico}
-                </Text>
-              ))
+                <Text style={styles.detalleTitulo}>Historial de consultas</Text>
+                {historial.length === 0 ? (
+                  <Text style={styles.detalleVacio}>Aún no tiene consultas registradas</Text>
+                ) : (
+                  historial.map((c) => (
+                    <Text key={c.id} style={styles.detalleTexto}>
+                      {c.fecha} · {c.diagnostico}
+                    </Text>
+                  ))
+                )}
+              </>
             )}
 
             <CustomButton
@@ -116,19 +180,18 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Recepcion</Text>
+        <Text style={styles.title}>Recepción</Text>
         <Text style={styles.subtitle}>Buscar paciente por nombre o identidad</Text>
 
         <CustomInput
-          label="Nombre o numero de identidad"
+          label="Nombre o número de identidad"
           value={busqueda}
-          onChangeText={setBusqueda}
+          onChangeText={handleBuscar}
           validationType="text"
           required={false}
           placeholder="Escribe nombre o identidad..."
         />
 
-        {/* lista de pacientes que coinciden con la busqueda */}
         <FlatList
           data={resultados}
           keyExtractor={(item) => item.id}
@@ -138,7 +201,9 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
             <Text style={styles.emptyText}>
               {busqueda.trim() === ''
                 ? 'Escribe un nombre o identidad para buscar'
-                : 'No se encontro ningun paciente con esos datos'}
+                : buscando
+                ? 'Buscando...'
+                : 'No se encontró ningún paciente con esos datos'}
             </Text>
           }
         />
@@ -148,8 +213,6 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           onPress={() => navigation?.navigate('NuevoPaciente')}
           variant="primary"
         />
-
-        {/* ya no manda parametros, el perfil saca todo del AuthContext */}
         <CustomButton
           title="Ver perfil"
           onPress={() => navigation?.navigate('Perfil')}
@@ -157,7 +220,7 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           style={{ marginTop: 10 }}
         />
         <CustomButton
-          title="Cerrar sesion"
+          title="Cerrar sesión"
           onPress={handleCerrarSesion}
           variant="danger"
           style={{ marginTop: 10 }}
@@ -168,81 +231,19 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6B7280',
-    marginTop: 4,
-    marginBottom: 16,
-  },
-  list: {
-    paddingBottom: 20,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  nombre: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  detalle: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 4,
-  },
-  accion: {
-    fontSize: 12,
-    color: '#2563EB',
-    marginTop: 6,
-    fontWeight: '600',
-  },
-  detalleBox: {
-    marginTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    paddingTop: 10,
-  },
-  detalleTitulo: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#374151',
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  detalleTexto: {
-    fontSize: 13,
-    color: '#111827',
-    marginBottom: 2,
-  },
-  detalleVacio: {
-    fontSize: 13,
-    color: '#9CA3AF',
-    fontStyle: 'italic',
-  },
-  agendarButton: {
-    marginTop: 12,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#9CA3AF',
-    marginTop: 30,
-  },
+  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, padding: 20 },
+  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
+  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 16 },
+  list: { paddingBottom: 20 },
+  card: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#E5E7EB' },
+  nombre: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  detalle: { fontSize: 13, color: '#6B7280', marginTop: 4 },
+  accion: { fontSize: 12, color: '#2563EB', marginTop: 6, fontWeight: '600' },
+  detalleBox: { marginTop: 12, borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 10 },
+  detalleTitulo: { fontSize: 12, fontWeight: '700', color: '#374151', marginTop: 8, marginBottom: 4 },
+  detalleTexto: { fontSize: 13, color: '#111827', marginBottom: 2 },
+  detalleVacio: { fontSize: 13, color: '#9CA3AF', fontStyle: 'italic' },
+  agendarButton: { marginTop: 12 },
+  emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 30 },
 });
