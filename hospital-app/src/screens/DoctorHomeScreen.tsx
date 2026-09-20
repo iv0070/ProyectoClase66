@@ -2,23 +2,34 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import CustomButton from '../components/CustomButtom';
 import CustomInput from '../components/CustomInput';
-import { citas as citasIniciales, pacientes, doctores, doctorActualId } from '../data/mockData';
+import { citas as citasIniciales, pacientes } from '../data/mockData';
 import { Cita } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 interface DoctorHomeScreenProps {
   navigation?: any;
 }
 
-const doctorActual = doctores.find((d) => d.id === doctorActualId) ?? doctores[0];
-
 export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) {
+  const { user } = useAuth();
   const [citas, setCitas] = useState<Cita[]>(citasIniciales);
   const [citaEnReprogramacion, setCitaEnReprogramacion] = useState<string | null>(null);
   const [nuevaFecha, setNuevaFecha] = useState('');
   const [nuevaHora, setNuevaHora] = useState('');
   const [reprogramarError, setReprogramarError] = useState('');
 
-  const citasDelDoctor = citas.filter((c) => c.doctorId === doctorActual.id);
+  // Si por algo no hay usuario logueado, no debería llegar aqui, pero por seguridad:
+  if (!user) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <Text style={styles.title}>No hay sesión activa</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const citasDelDoctor = citas.filter((c) => c.doctorId === user.id);
 
   const getNombrePaciente = (pacienteId: string) => {
     const paciente = pacientes.find((p) => p.id === pacienteId);
@@ -176,7 +187,7 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Hola, {doctorActual.nombre}</Text>
+        <Text style={styles.title}>Hola, {user.nombre}</Text>
         <Text style={styles.subtitle}>Citas de hoy</Text>
 
         <FlatList
@@ -199,9 +210,9 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
           onPress={() =>
             navigation?.navigate('Perfil', {
               rol: 'doctor',
-              nombre: doctorActual.nombre,
-              usuario: doctorActual.usuario,
-              especialidad: doctorActual.especialidad,
+              nombre: user.nombre,
+              usuario: user.usuario,
+              especialidad: user.especialidad,
             })
           }
           variant="secondary"
