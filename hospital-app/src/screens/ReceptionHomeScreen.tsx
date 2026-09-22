@@ -10,17 +10,20 @@ import {
   recepcionistas,
 } from '../data/mockData';
 import { Paciente } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 interface ReceptionHomeScreenProps {
   navigation?: any;
 }
 
 export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenProps) {
+  const { user, logout } = useAuth();
+  const recepcionistaActual = recepcionistas.find((r) => r.id === user?.id) ?? recepcionistas[0];
+
   const [busqueda, setBusqueda] = useState('');
   const [pacientes] = useState<Paciente[]>(pacientesIniciales);
   const [pacienteExpandido, setPacienteExpandido] = useState<string | null>(null);
 
-  // ahora busca tanto por nombre como por número de identidad
   const resultados = pacientes.filter(
     (p) =>
       p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -41,6 +44,11 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
   const getNombreDoctor = (doctorId: string) => {
     const doc = doctores.find((d) => d.id === doctorId);
     return doc ? doc.nombre : 'Doctor desconocido';
+  };
+
+  const handleCerrarSesion = async () => {
+    await logout();
+    navigation?.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
   const renderPaciente = ({ item }: { item: Paciente }) => {
@@ -135,8 +143,8 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           onPress={() =>
             navigation?.navigate('Perfil', {
               rol: 'recepcion',
-              nombre: recepcionistas[0].nombre,
-              usuario: recepcionistas[0].usuario,
+              nombre: recepcionistaActual.nombre,
+              usuario: recepcionistaActual.usuario,
             })
           }
           variant="secondary"
@@ -144,7 +152,7 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
         />
         <CustomButton
           title="Cerrar sesión"
-          onPress={() => navigation?.navigate('Login')}
+          onPress={handleCerrarSesion}
           variant="danger"
           style={{ marginTop: 10 }}
         />
@@ -154,81 +162,19 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6B7280',
-    marginTop: 4,
-    marginBottom: 16,
-  },
-  list: {
-    paddingBottom: 20,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  nombre: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  detalle: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 4,
-  },
-  accion: {
-    fontSize: 12,
-    color: '#2563EB',
-    marginTop: 6,
-    fontWeight: '600',
-  },
-  detalleBox: {
-    marginTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    paddingTop: 10,
-  },
-  detalleTitulo: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#374151',
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  detalleTexto: {
-    fontSize: 13,
-    color: '#111827',
-    marginBottom: 2,
-  },
-  detalleVacio: {
-    fontSize: 13,
-    color: '#9CA3AF',
-    fontStyle: 'italic',
-  },
-  agendarButton: {
-    marginTop: 12,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#9CA3AF',
-    marginTop: 30,
-  },
+  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, padding: 20 },
+  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
+  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 16 },
+  list: { paddingBottom: 20 },
+  card: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#E5E7EB' },
+  nombre: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  detalle: { fontSize: 13, color: '#6B7280', marginTop: 4 },
+  accion: { fontSize: 12, color: '#2563EB', marginTop: 6, fontWeight: '600' },
+  detalleBox: { marginTop: 12, borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 10 },
+  detalleTitulo: { fontSize: 12, fontWeight: '700', color: '#374151', marginTop: 8, marginBottom: 4 },
+  detalleTexto: { fontSize: 13, color: '#111827', marginBottom: 2 },
+  detalleVacio: { fontSize: 13, color: '#9CA3AF', fontStyle: 'italic' },
+  agendarButton: { marginTop: 12 },
+  emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 30 },
 });

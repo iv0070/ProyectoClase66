@@ -4,6 +4,7 @@ import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
 import { doctores, recepcionistas } from '../data/mockData';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginScreenProps {
   navigation?: any;
@@ -14,6 +15,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const [contrasena, setContrasena] = useState('');
   const [loginError, setLoginError] = useState('');
   const [cargando, setCargando] = useState(false);
+  const { loginMock } = useAuth();
 
   const handleLogin = async () => {
     if (usuario.trim() === '' || contrasena.trim() === '') {
@@ -71,6 +73,12 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       (d) => d.usuario === usuario && d.contrasena === contrasena
     );
     if (doctorValido) {
+      loginMock({
+        id: doctorValido.id,
+        nombre: doctorValido.nombre,
+        usuario: doctorValido.usuario,
+        rol: 'doctor',
+      });
       navigation?.navigate('DoctorStack');
       return;
     }
@@ -79,6 +87,12 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       (r) => r.usuario === usuario && r.contrasena === contrasena
     );
     if (recepcionistaValido) {
+      loginMock({
+        id: recepcionistaValido.id,
+        nombre: recepcionistaValido.nombre,
+        usuario: recepcionistaValido.usuario,
+        rol: 'recepcion',
+      });
       navigation?.navigate('ReceptionStack');
       return;
     }

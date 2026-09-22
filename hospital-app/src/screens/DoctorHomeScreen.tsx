@@ -2,16 +2,18 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import CustomButton from '../components/CustomButtom';
 import CustomInput from '../components/CustomInput';
-import { citas as citasIniciales, pacientes, doctores, doctorActualId } from '../data/mockData';
+import { citas as citasIniciales, pacientes, doctores } from '../data/mockData';
 import { Cita } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 interface DoctorHomeScreenProps {
   navigation?: any;
 }
 
-const doctorActual = doctores.find((d) => d.id === doctorActualId) ?? doctores[0];
-
 export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) {
+  const { user, logout } = useAuth();
+  const doctorActual = doctores.find((d) => d.id === user?.id) ?? doctores[0];
+
   const [citas, setCitas] = useState<Cita[]>(citasIniciales);
   const [citaEnReprogramacion, setCitaEnReprogramacion] = useState<string | null>(null);
   const [nuevaFecha, setNuevaFecha] = useState('');
@@ -97,6 +99,11 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     setNuevaFecha('');
     setNuevaHora('');
     setReprogramarError('');
+  };
+
+  const handleCerrarSesion = async () => {
+    await logout();
+    navigation?.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
   const renderCita = ({ item }: { item: Cita }) => (
@@ -209,7 +216,7 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
         />
         <CustomButton
           title="Cerrar sesión"
-          onPress={() => navigation?.navigate('Login')}
+          onPress={handleCerrarSesion}
           variant="danger"
           style={{ marginTop: 10 }}
         />
@@ -219,88 +226,21 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6B7280',
-    marginTop: 4,
-    marginBottom: 16,
-  },
-  list: {
-    paddingBottom: 20,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  pacienteNombre: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
-  hora: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 6,
-  },
-  accionesRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 10,
-  },
-  accionButton: {
-    flex: 1,
-  },
-  reprogramarButton: {
-    marginTop: 10,
-  },
-  reprogramarBox: {
-    marginTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    paddingTop: 10,
-  },
-  errorText: {
-    color: '#DC2626',
-    fontSize: 14,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#9CA3AF',
-    marginTop: 40,
-  },
+  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, padding: 20 },
+  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
+  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 16 },
+  list: { paddingBottom: 20 },
+  card: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#E5E7EB' },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  pacienteNombre: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  badgeText: { color: '#fff', fontSize: 12, fontWeight: '600', textTransform: 'capitalize' },
+  hora: { fontSize: 13, color: '#6B7280', marginTop: 6 },
+  accionesRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  accionButton: { flex: 1 },
+  reprogramarButton: { marginTop: 10 },
+  reprogramarBox: { marginTop: 10, borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 10 },
+  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 8, textAlign: 'center' },
+  emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 40 },
 });
