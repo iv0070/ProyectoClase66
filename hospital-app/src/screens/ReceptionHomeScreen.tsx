@@ -1,49 +1,120 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import {
-  pacientes as pacientesIniciales,
-  citas,
-  consultas,
-  doctores,
-  recepcionistas,
-} from '../data/mockData';
-import { Paciente } from '../types';
+import { supabase } from '../../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
 interface ReceptionHomeScreenProps {
   navigation?: any;
 }
 
+interface PacienteReal {
+  id: string;
+  nombre: string;
+  telefono: string | null;
+  identidad: string | null;
+}
+
+interface CitaReal {
+  id: string;
+  fecha: string;
+  hora: string;
+  estado: string;
+  doctor_nombre: string;
+}
+
+interface ConsultaReal {
+  id: string;
+  fecha: string;
+  diagnostico: string;
+}
+
 export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenProps) {
   const { user, logout } = useAuth();
-  const recepcionistaActual = recepcionistas.find((r) => r.id === user?.id) ?? recepcionistas[0];
 
   const [busqueda, setBusqueda] = useState('');
-  const [pacientes] = useState<Paciente[]>(pacientesIniciales);
+  const [resultados, setResultados] = useState<PacienteReal[]>([]);
+  const [buscando, setBuscando] = useState(false);
   const [pacienteExpandido, setPacienteExpandido] = useState<string | null>(null);
+  const [proximaCita, setProximaCita] = useState<CitaReal | null>(null);
+  const [historial, setHistorial] = useState<ConsultaReal[]>([]);
+  const [cargandoDetalle, setCargandoDetalle] = useState(false);
 
-  const resultados = pacientes.filter(
-    (p) =>
-      p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      p.identidad.includes(busqueda)
-  );
+  const handleBuscar = async (texto: string) => {
+    setBusqueda(texto);
 
-  const handleSeleccionarPaciente = (paciente: Paciente) => {
+    if (texto.trim() === '') {
+      setResultados([]);
+      return;
+    }
+
+    setBuscando(true);
+
+    const { data, error } = await supabase
+      .from('perfiles')
+      .select('id, nombre, telefono, identidad')
+      .eq('rol', 'paciente')
+      .or(`nombre.ilike.%${texto}%,identidad.ilike.%${texto}%`);
+
+    if (!error && data) {
+      setResultados(data);
+    }
+    setBuscando(false);
+  };
+
+  const cargarDetallePaciente = async (pacienteId: string) => {
+    setCargandoDetalle(true);
+
+    const { data: citaData } = await supabase
+      .from('citas')
+      .select(`
+        id, fecha, hora, estado,
+        doctor:perfiles!citas_doctor_id_fkey ( nombre )
+      `)
+      .eq('paciente_id', pacienteId)
+      .in('estado', ['pendiente', 'confirmada'])
+      .order('fecha', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (citaData) {
+      setProximaCita({
+        id: citaData.id,
+        fecha: citaData.fecha,
+        hora: citaData.hora,
+        estado: citaData.estado,
+        doctor_nombre: (citaData.doctor as any)?.nombre ?? 'Doctor desconocido',
+      });
+    } else {
+      setProximaCita(null);
+    }
+
+    const { data: consultasData } = await supabase
+      .from('consultas')
+      .select('id, fecha, diagnostico')
+      .eq('paciente_id', pacienteId)
+      .order('fecha', { ascending: false });
+
+    setHistorial(consultasData ?? []);
+    setCargandoDetalle(false);
+  };
+
+  const handleToggleExpandir = (pacienteId: string) => {
+    if (pacienteExpandido === pacienteId) {
+      setPacienteExpandido(null);
+      return;
+    }
+    setPacienteExpandido(pacienteId);
+    cargarDetallePaciente(pacienteId);
+  };
+
+  const handleSeleccionarPaciente = (paciente: PacienteReal) => {
     navigation?.navigate('AgendarCita', {
       pacienteId: paciente.id,
       pacienteNombre: paciente.nombre,
     });
-  };
-
-  const handleToggleExpandir = (pacienteId: string) => {
-    setPacienteExpandido((actual) => (actual === pacienteId ? null : pacienteId));
-  };
-
-  const getNombreDoctor = (doctorId: string) => {
-    const doc = doctores.find((d) => d.id === doctorId);
-    return doc ? doc.nombre : 'Doctor desconocido';
   };
 
   const handleCerrarSesion = async () => {
@@ -51,20 +122,16 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
     navigation?.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
-  const renderPaciente = ({ item }: { item: Paciente }) => {
+  const renderPaciente = ({ item }: { item: PacienteReal }) => {
     const expandido = pacienteExpandido === item.id;
-
-    const proximaCita = citas.find(
-      (c) => c.pacienteId === item.id && (c.estado === 'pendiente' || c.estado === 'confirmada')
-    );
-
-    const historial = consultas.filter((c) => c.pacienteId === item.id);
 
     return (
       <View style={styles.card}>
         <TouchableOpacity onPress={() => handleToggleExpandir(item.id)}>
           <Text style={styles.nombre}>{item.nombre}</Text>
-          <Text style={styles.detalle}>Edad: {item.edad} · Tel: {item.telefono}</Text>
+          <Text style={styles.detalle}>
+            Tel: {item.telefono ?? 'N/D'} · ID: {item.identidad ?? 'N/D'}
+          </Text>
           <Text style={styles.accion}>
             {expandido ? 'Toca para ocultar detalle' : 'Toca para ver detalle'}
           </Text>
@@ -72,24 +139,30 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
 
         {expandido && (
           <View style={styles.detalleBox}>
-            <Text style={styles.detalleTitulo}>Próxima cita</Text>
-            {proximaCita ? (
-              <Text style={styles.detalleTexto}>
-                {proximaCita.fecha} · {proximaCita.hora} con {getNombreDoctor(proximaCita.doctorId)} ({proximaCita.estado})
-              </Text>
+            {cargandoDetalle ? (
+              <Text style={styles.detalleVacio}>Cargando...</Text>
             ) : (
-              <Text style={styles.detalleVacio}>No tiene ninguna cita pendiente</Text>
-            )}
+              <>
+                <Text style={styles.detalleTitulo}>Próxima cita</Text>
+                {proximaCita ? (
+                  <Text style={styles.detalleTexto}>
+                    {proximaCita.fecha} · {proximaCita.hora} con {proximaCita.doctor_nombre} ({proximaCita.estado})
+                  </Text>
+                ) : (
+                  <Text style={styles.detalleVacio}>No tiene ninguna cita pendiente</Text>
+                )}
 
-            <Text style={styles.detalleTitulo}>Historial de consultas</Text>
-            {historial.length === 0 ? (
-              <Text style={styles.detalleVacio}>Aún no tiene consultas registradas</Text>
-            ) : (
-              historial.map((c) => (
-                <Text key={c.id} style={styles.detalleTexto}>
-                  {c.fecha} · {c.diagnostico}
-                </Text>
-              ))
+                <Text style={styles.detalleTitulo}>Historial de consultas</Text>
+                {historial.length === 0 ? (
+                  <Text style={styles.detalleVacio}>Aún no tiene consultas registradas</Text>
+                ) : (
+                  historial.map((c) => (
+                    <Text key={c.id} style={styles.detalleTexto}>
+                      {c.fecha} · {c.diagnostico}
+                    </Text>
+                  ))
+                )}
+              </>
             )}
 
             <CustomButton
@@ -113,7 +186,7 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
         <CustomInput
           label="Nombre o número de identidad"
           value={busqueda}
-          onChangeText={setBusqueda}
+          onChangeText={handleBuscar}
           validationType="text"
           required={false}
           placeholder="Escribe nombre o identidad..."
@@ -128,6 +201,8 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
             <Text style={styles.emptyText}>
               {busqueda.trim() === ''
                 ? 'Escribe un nombre o identidad para buscar'
+                : buscando
+                ? 'Buscando...'
                 : 'No se encontró ningún paciente con esos datos'}
             </Text>
           }
@@ -143,8 +218,8 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           onPress={() =>
             navigation?.navigate('Perfil', {
               rol: 'recepcion',
-              nombre: recepcionistaActual.nombre,
-              usuario: recepcionistaActual.usuario,
+              nombre: user?.nombre,
+              usuario: user?.usuario,
             })
           }
           variant="secondary"

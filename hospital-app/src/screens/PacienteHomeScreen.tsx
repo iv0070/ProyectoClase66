@@ -4,22 +4,24 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import CustomButton from '../components/CustomButtom';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 interface PacienteHomeScreenProps {
   navigation?: any;
 }
 
 export default function PacienteHomeScreen({ navigation }: PacienteHomeScreenProps) {
-  const [nombre, setNombre] = useState('...');
+  const { user } = useAuth();
+  const [nombre, setNombre] = useState(user?.nombre ?? '...');
 
   const cargarNombre = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) return;
 
     const { data } = await supabase
       .from('perfiles')
       .select('nombre')
-      .eq('id', user.id)
+      .eq('id', authUser.id)
       .single();
 
     if (data) setNombre(data.nombre);
