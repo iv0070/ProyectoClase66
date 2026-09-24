@@ -2,11 +2,12 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/LoginScreen';
-import DoctorStackNavigator from './DoctorStackNavigator';
+
 import ReceptionStackNavigator from './ReceptionStackNavigator';
 import PatientStackNavigator from './PatientStackNavigator';
 import RegistroPacienteScreen from '../screens/RegistroPacienteScreen';
 import CambiarPasswordObligatorioScreen from '../screens/CambiarPasswordObligatorioScreen';
+import DoctorStackNavigator from './DoctorStackNavigator';
 
 export type RootStackParamList = {
   Login: undefined;

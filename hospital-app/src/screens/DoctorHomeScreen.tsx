@@ -18,10 +18,13 @@ interface CitaConPaciente {
   fecha: string;
   hora: string;
   estado: 'pendiente' | 'confirmada' | 'completada' | 'rechazada';
+  motivo: string | null;
+  tipo_consulta: string | null;
   paciente: { nombre: string } | null;
 }
 
 export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) {
+   console.log('>>> DoctorHomeScreen SE ESTA RENDERIZANDO');
   const { user, logout } = useAuth(); //agregamos logout
   const [citas, setCitas] = useState<CitaConPaciente[]>([]); 
   const [cargando, setCargando] = useState(true); // NUEVO
@@ -178,6 +181,13 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
         </View>
       </View>
       <Text style={styles.hora}>{item.fecha} · {item.hora}</Text>
+            
+      {item.tipo_consulta && (
+        <Text style={styles.tipoConsulta}>
+          {item.tipo_consulta === 'primera_vez' ? 'Primera vez' : 'Seguimiento'}
+        </Text>
+      )}
+      {item.motivo && <Text style={styles.motivo}>{item.motivo}</Text>}
 
       {item.estado === 'pendiente' && (
         <View style={styles.accionesRow}>
@@ -247,7 +257,7 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Hola, {user.nombre}</Text>
-        <Text style={styles.subtitle}>Citas de hoy</Text>
+       <Text style={styles.subtitle}>PRUEBA 123</Text>
 
         {cargando ? (
           <Text style={styles.emptyText}>Cargando citas...</Text>
@@ -268,12 +278,7 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
           onPress={() => navigation?.navigate('NuevaConsulta')}
           variant="primary"
         />
-        <CustomButton
-          title="Ver perfil"
-          onPress={() => navigation?.navigate('Perfil')}
-          variant="secondary"
-          style={{ marginTop: 10 }}
-        />
+       
         <CustomButton
           title="Cerrar sesión"
           onPress={handleCerrarSesion}
@@ -297,6 +302,8 @@ const styles = StyleSheet.create({
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   badgeText: { color: '#fff', fontSize: 12, fontWeight: '600', textTransform: 'capitalize' },
   hora: { fontSize: 13, color: '#6B7280', marginTop: 6 },
+  tipoConsulta: { fontSize: 12, color: '#2563EB', marginTop: 4, fontWeight: '600' },
+  motivo: { fontSize: 13, color: '#374151', marginTop: 4 },
   accionesRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
   accionButton: { flex: 1 },
   reprogramarButton: { marginTop: 10 },
