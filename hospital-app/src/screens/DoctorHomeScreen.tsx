@@ -1,39 +1,49 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native'; // NUEVO
+import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert, TouchableOpacity } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import CustomButton from '../components/CustomButtom';
 import CustomInput from '../components/CustomInput';
-import { supabase } from '../../lib/supabase'; // NUEVO
+import { supabase } from '../../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
 interface DoctorHomeScreenProps {
   navigation?: any;
 }
 
-//la cita ahora incluye el nombre del paciente, traido con un join
+type Estado = 'pendiente' | 'confirmada' | 'completada' | 'rechazada';
+
 interface CitaConPaciente {
   id: string;
   paciente_id: string;
   doctor_id: string;
   fecha: string;
   hora: string;
-  estado: 'pendiente' | 'confirmada' | 'completada' | 'rechazada';
+  estado: Estado;
   motivo: string | null;
   tipo_consulta: string | null;
   paciente: { nombre: string } | null;
 }
 
+type FiltroEstado = 'todas' | Estado;
+
+const FILTROS: { key: FiltroEstado; label: string }[] = [
+  { key: 'todas', label: 'Todas' },
+  { key: 'pendiente', label: 'Pendientes' },
+  { key: 'confirmada', label: 'Confirmadas' },
+  { key: 'completada', label: 'Completadas' },
+  { key: 'rechazada', label: 'Rechazadas' },
+];
+
 export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) {
-   console.log('>>> DoctorHomeScreen SE ESTA RENDERIZANDO');
-  const { user, logout } = useAuth(); //agregamos logout
-  const [citas, setCitas] = useState<CitaConPaciente[]>([]); 
-  const [cargando, setCargando] = useState(true); // NUEVO
+  const { user, logout } = useAuth();
+  const [citas, setCitas] = useState<CitaConPaciente[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [filtro, setFiltro] = useState<FiltroEstado>('todas');
   const [citaEnReprogramacion, setCitaEnReprogramacion] = useState<string | null>(null);
   const [nuevaFecha, setNuevaFecha] = useState('');
   const [nuevaHora, setNuevaHora] = useState('');
   const [reprogramarError, setReprogramarError] = useState('');
 
-  //trae las citas del doctor desde Supabase, con el nombre del paciente
   const cargarCitas = useCallback(async () => {
     if (!user) return;
 
@@ -50,14 +60,12 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     setCargando(false);
   }, [user]);
 
-  //recarga las citas cada vez que entras a esta pantalla
   useFocusEffect(
     useCallback(() => {
       cargarCitas();
     }, [cargarCitas])
   );
 
-  //Si por algo no hay usuario logueado, no deberia llegar aqui, pero por seguridad
   if (!user) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -68,11 +76,13 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     );
   }
 
+  const citasFiltradas = filtro === 'todas' ? citas : citas.filter((c) => c.estado === filtro);
+
   const getNombrePaciente = (cita: CitaConPaciente) => {
-    return cita.paciente?.nombre ?? 'Paciente desconocido'; // CAMBIO
+    return cita.paciente?.nombre ?? 'Paciente desconocido';
   };
 
-  const getColorEstado = (estado: CitaConPaciente['estado']) => {
+  const getColorEstado = (estado: Estado) => {
     switch (estado) {
       case 'pendiente':
         return '#F59E0B';
@@ -87,7 +97,6 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     }
   };
 
-  //ahora actualiza Supabase en vez del estado local
   const handleConfirmar = async (citaId: string) => {
     const { error } = await supabase
       .from('citas')
@@ -100,7 +109,6 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     }
     cargarCitas();
   };
-
 
   const handleRechazar = (citaId: string) => {
     Alert.alert(
@@ -142,7 +150,6 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     setReprogramarError('');
   };
 
-  //ahora actualiza Supabase en vez del estado local
   const handleConfirmarReprogramacion = async (citaId: string) => {
     if (nuevaFecha.trim() === '' || nuevaHora.trim() === '') {
       setReprogramarError('Debes ingresar fecha y hora nuevas');
@@ -166,12 +173,6 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     cargarCitas();
   };
 
-  //cierra sesion de verdad (Supabase + limpia el user del context)
-  const handleCerrarSesion = async () => {
-    await logout();
-    navigation?.reset({ index: 0, routes: [{ name: 'Login' }] });
-  };
-
   const renderCita = ({ item }: { item: CitaConPaciente }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -181,7 +182,7 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
         </View>
       </View>
       <Text style={styles.hora}>{item.fecha} · {item.hora}</Text>
-            
+
       {item.tipo_consulta && (
         <Text style={styles.tipoConsulta}>
           {item.tipo_consulta === 'primera_vez' ? 'Primera vez' : 'Seguimiento'}
@@ -257,34 +258,36 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Hola, {user.nombre}</Text>
-       <Text style={styles.subtitle}>PRUEBA 123</Text>
+        <Text style={styles.subtitle}>Citas de hoy</Text>
+
+        <View style={styles.filtrosRow}>
+          {FILTROS.map((f) => {
+            const activo = filtro === f.key;
+            return (
+              <TouchableOpacity
+                key={f.key}
+                style={[styles.chip, activo && styles.chipActivo]}
+                onPress={() => setFiltro(f.key)}
+              >
+                <Text style={[styles.chipTexto, activo && styles.chipTextoActivo]}>{f.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
         {cargando ? (
           <Text style={styles.emptyText}>Cargando citas...</Text>
         ) : (
           <FlatList
-            data={citas}
+            data={citasFiltradas}
             keyExtractor={(item) => item.id}
             renderItem={renderCita}
             contentContainerStyle={styles.list}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No tienes citas registradas por ahora</Text>
+              <Text style={styles.emptyText}>No hay citas en este filtro</Text>
             }
           />
         )}
-
-        <CustomButton
-          title="Nueva consulta"
-          onPress={() => navigation?.navigate('NuevaConsulta')}
-          variant="primary"
-        />
-       
-        <CustomButton
-          title="Cerrar sesión"
-          onPress={handleCerrarSesion}
-          variant="danger"
-          style={{ marginTop: 10 }}
-        />
       </View>
     </SafeAreaView>
   );
@@ -294,7 +297,12 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
   container: { flex: 1, padding: 20 },
   title: { fontSize: 22, fontWeight: '700', color: '#111827' },
-  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 16 },
+  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 12 },
+  filtrosRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: '#D1D5DB', backgroundColor: '#fff' },
+  chipActivo: { backgroundColor: '#2563EB', borderColor: '#2563EB' },
+  chipTexto: { fontSize: 13, color: '#374151' },
+  chipTextoActivo: { color: '#fff', fontWeight: '600' },
   list: { paddingBottom: 20 },
   card: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#E5E7EB' },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

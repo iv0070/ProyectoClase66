@@ -15,6 +15,7 @@ interface CitaConfirmada {
   paciente_id: string;
   fecha: string;
   hora: string;
+   motivo: string | null;
   paciente: { nombre: string } | null;
 }
 
@@ -30,6 +31,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
   const [sintomas, setSintomas] = useState('');
   const [diagnostico, setDiagnostico] = useState('');
   const [medicamento, setMedicamento] = useState('');
+   const [notas, setNotas] = useState('');
   const [formError, setFormError] = useState('');
   const [cargando, setCargando] = useState(false);
 
@@ -38,7 +40,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
 
     const { data, error } = await supabase
       .from('citas')
-      .select('id, paciente_id, fecha, hora, paciente:perfiles!paciente_id(nombre)')
+            .select('id, paciente_id, fecha, hora, motivo, paciente:perfiles!paciente_id(nombre)')
       .eq('doctor_id', user.id)
       .eq('estado', 'confirmada')
       .order('fecha', { ascending: true });
@@ -97,6 +99,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
       sintomas,
       diagnostico,
       medicamento,
+        notas: notas.trim() || null,
     });
 
     if (consultaError) {
@@ -156,8 +159,15 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
           )}
         </View>
 
-        {citaSeleccionada && (
+               {citaSeleccionada && (
           <>
+            {citaSeleccionada.motivo && (
+              <View style={styles.motivoBox}>
+                <Text style={styles.motivoLabel}>Motivo de la consulta</Text>
+                <Text style={styles.motivoTexto}>{citaSeleccionada.motivo}</Text>
+              </View>
+            )}
+
             <CustomInput
               label="Fecha (AAAA-MM-DD)"
               value={fecha}
@@ -199,6 +209,17 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
               validationType="text"
               placeholder="Medicamento recetado"
             />
+               
+
+            <CustomInput
+              label="Notas / Observaciones"
+              value={notas}
+              onChangeText={setNotas}
+              validationType="text"
+              placeholder="Observaciones adicionales sobre la consulta (opcional)"
+              multiline
+            />
+
           </>
         )}
 
@@ -222,7 +243,10 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', color: '#111827' },
   subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 12 },
   citasList: { marginBottom: 16 },
-  citaButton: { marginBottom: 8 },
+   citaButton: { marginBottom: 8 },
+  motivoBox: { backgroundColor: '#EFF6FF', borderRadius: 8, padding: 12, marginBottom: 16 },
+  motivoLabel: { fontSize: 12, color: '#2563EB', fontWeight: '600', marginBottom: 4 },
+  motivoTexto: { fontSize: 14, color: '#1E3A8A' },
   emptyText: { textAlign: 'center', color: '#9CA3AF', marginVertical: 12 },
   errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
 });
