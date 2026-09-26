@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
@@ -38,13 +38,16 @@ function EstadoBadge({ label, activo }: { label: string; activo: boolean }) {
   );
 }
 
-interface CitaConDoctor {
+interface Recibo {
   id: string;
+  fecha: string;
   especialidad: string;
+  farmaciaNombre: string | null;
+  descuentoFarmacia: number;
 }
 
 export default function FacturacionScreen() {
-  const [citaActual, setCitaActual] = useState<CitaConDoctor | null>(null);
+  const [recibos, setRecibos] = useState<Recibo[]>([]);
   const [edadPaciente, setEdadPaciente] = useState<number | null>(null);
   const [cargando, setCargando] = useState(true);
 
@@ -55,7 +58,6 @@ export default function FacturacionScreen() {
       return;
     }
 
-    // 1. Traer la fecha de nacimiento del paciente para calcular su edad
     const { data: perfil } = await supabase
       .from('perfiles')
       .select('fecha_nacimiento')
@@ -66,25 +68,26 @@ export default function FacturacionScreen() {
       setEdadPaciente(calcularEdad(perfil.fecha_nacimiento));
     }
 
-    // 2. Traer la cita más reciente, con la especialidad del doctor
     const { data, error } = await supabase
-      .from('citas')
+      .from('consultas')
       .select(`
         id,
-        doctor:perfiles!citas_doctor_id_fkey ( especialidad )
+        fecha,
+        cita:citas!cita_id ( doctor:perfiles!doctor_id ( especialidad ) ),
+        farmacia:farmacias ( nombre, descuento )
       `)
       .eq('paciente_id', user.id)
-      .order('fecha', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order('fecha', { ascending: false });
 
     if (!error && data) {
-      setCitaActual({
-        id: data.id,
-        especialidad: (data.doctor as any)?.especialidad ?? '',
-      });
-    } else {
-      setCitaActual(null);
+      const formateados: Recibo[] = (data as any[]).map((c) => ({
+        id: c.id,
+        fecha: c.fecha,
+        especialidad: c.cita?.doctor?.especialidad ?? '',
+        farmaciaNombre: c.farmacia?.nombre ?? null,
+        descuentoFarmacia: c.farmacia?.descuento ?? 0,
+      }));
+      setRecibos(formateados);
     }
 
     setCargando(false);
@@ -96,11 +99,19 @@ export default function FacturacionScreen() {
     }, [cargarFacturacion])
   );
 
-  const costoBase = citaActual ? costosPorEspecialidad[citaActual.especialidad] ?? 0 : 0;
-  const aplicaDescuento = (edadPaciente ?? 0) >= EDAD_TERCERA_EDAD;
-  const costoFinal = aplicaDescuento
-    ? costoBase * (1 - DESCUENTO_TERCERA_EDAD / 100)
-    : costoBase;
+  const aplicaDescuentoEdad = (edadPaciente ?? 0) >= EDAD_TERCERA_EDAD;
+
+  const calcularRecibo = (recibo: Recibo) => {
+    const costoBase = costosPorEspecialidad[recibo.especialidad] ?? 0;
+    const descuentoEdadPct = aplicaDescuentoEdad ? DESCUENTO_TERCERA_EDAD : 0;
+    const descuentoFarmaciaPct = recibo.farmaciaNombre ? recibo.descuentoFarmacia : 0;
+    const descuentoTotalPct = descuentoEdadPct + descuentoFarmaciaPct;
+    const montoDescuento = costoBase * (descuentoTotalPct / 100);
+    const total = costoBase - montoDescuento;
+    return { costoBase, descuentoEdadPct, descuentoFarmaciaPct, montoDescuento, total };
+  };
+
+  const totalGeneral = recibos.reduce((suma, r) => suma + calcularRecibo(r).total, 0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -109,31 +120,67 @@ export default function FacturacionScreen() {
 
         {cargando ? (
           <Text style={styles.vacio}>Cargando...</Text>
-        ) : !citaActual ? (
+        ) : recibos.length === 0 ? (
           <Text style={styles.vacio}>No hay ninguna consulta para facturar todavía.</Text>
         ) : (
-          <View style={styles.card}>
-            <View style={styles.filaEntre}>
-              <Text style={styles.especialidad}>{citaActual.especialidad.replace('_', ' ')}</Text>
-              <EstadoBadge label={aplicaDescuento ? 'Descuento aplicado' : 'Sin descuento'} activo={aplicaDescuento} />
+          <>
+            <FlatList
+              data={recibos}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              renderItem={({ item }) => {
+                const { costoBase, descuentoEdadPct, descuentoFarmaciaPct, montoDescuento, total } = calcularRecibo(item);
+                const tieneDescuento = descuentoEdadPct > 0 || descuentoFarmaciaPct > 0;
+
+                return (
+                  <View style={styles.card}>
+                    <View style={styles.filaEntre}>
+                      <Text style={styles.especialidad}>{item.especialidad.replace('_', ' ')}</Text>
+                      <EstadoBadge label={tieneDescuento ? 'Con descuento' : 'Sin descuento'} activo={tieneDescuento} />
+                    </View>
+                    <Text style={styles.fecha}>{item.fecha}</Text>
+                    <View style={styles.linea} />
+
+                    <View style={styles.filaEntre}>
+                      <Text style={styles.label}>Costo de consulta</Text>
+                      <Text style={styles.valor}>L. {costoBase.toFixed(2)}</Text>
+                    </View>
+
+                    {descuentoEdadPct > 0 && (
+                      <View style={styles.filaEntre}>
+                        <Text style={styles.labelDescuento}>Descuento tercera edad ({descuentoEdadPct}%)</Text>
+                        <Text style={styles.valorDescuento}>
+                          - L. {(costoBase * descuentoEdadPct / 100).toFixed(2)}
+                        </Text>
+                      </View>
+                    )}
+
+                    {descuentoFarmaciaPct > 0 && (
+                      <View style={styles.filaEntre}>
+                        <Text style={styles.labelDescuento}>
+                          Descuento {item.farmaciaNombre} ({descuentoFarmaciaPct}%)
+                        </Text>
+                        <Text style={styles.valorDescuento}>
+                          - L. {(costoBase * descuentoFarmaciaPct / 100).toFixed(2)}
+                        </Text>
+                      </View>
+                    )}
+
+                    <View style={styles.linea} />
+                    <View style={styles.filaEntre}>
+                      <Text style={styles.labelTotal}>Total</Text>
+                      <Text style={styles.valorTotal}>L. {total.toFixed(2)}</Text>
+                    </View>
+                  </View>
+                );
+              }}
+            />
+
+            <View style={styles.totalGeneralBox}>
+              <Text style={styles.totalGeneralLabel}>Total acumulado</Text>
+              <Text style={styles.totalGeneralValor}>L. {totalGeneral.toFixed(2)}</Text>
             </View>
-            <View style={styles.linea} />
-            <View style={styles.filaEntre}>
-              <Text style={styles.label}>Costo de consulta</Text>
-              <Text style={styles.valor}>L. {costoBase.toFixed(2)}</Text>
-            </View>
-            {aplicaDescuento && (
-              <View style={styles.filaEntre}>
-                <Text style={styles.labelDescuento}>Descuento tercera edad ({DESCUENTO_TERCERA_EDAD}%)</Text>
-                <Text style={styles.valorDescuento}>- L. {(costoBase - costoFinal).toFixed(2)}</Text>
-              </View>
-            )}
-            <View style={styles.linea} />
-            <View style={styles.filaEntre}>
-              <Text style={styles.labelTotal}>Total a pagar</Text>
-              <Text style={styles.valorTotal}>L. {costoFinal.toFixed(2)}</Text>
-            </View>
-          </View>
+          </>
         )}
       </View>
     </SafeAreaView>
@@ -145,9 +192,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
   title: { fontSize: 24, fontWeight: '700', color: '#111827', marginBottom: 20 },
   vacio: { fontSize: 14, color: '#6B7280', textAlign: 'center', marginTop: 40 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 18, borderWidth: 1, borderColor: '#E5E7EB' },
+  card: { backgroundColor: '#fff', borderRadius: 12, padding: 18, borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 12 },
   filaEntre: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 6 },
   especialidad: { fontSize: 16, fontWeight: '700', color: '#111827', textTransform: 'capitalize' },
+  fecha: { fontSize: 12, color: '#9CA3AF' },
   linea: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 10 },
   label: { fontSize: 14, color: '#374151' },
   valor: { fontSize: 14, color: '#111827', fontWeight: '600' },
@@ -161,4 +209,7 @@ const styles = StyleSheet.create({
   badgeTexto: { fontSize: 11, fontWeight: '600' },
   badgeTextoVerde: { color: '#16A34A' },
   badgeTextoGris: { color: '#6B7280' },
+  totalGeneralBox: { backgroundColor: '#111827', borderRadius: 12, padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  totalGeneralLabel: { fontSize: 14, color: '#D1D5DB', fontWeight: '600' },
+  totalGeneralValor: { fontSize: 22, fontWeight: '800', color: '#fff' },
 });

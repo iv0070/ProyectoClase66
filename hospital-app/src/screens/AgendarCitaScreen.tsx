@@ -142,6 +142,8 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
       fecha: fechaSeleccionada,
       hora: horaSeleccionada,
       estado: 'pendiente',
+      motivo: motivo.trim(),
+      tipo_consulta: tipoConsulta,
     });
 
     setCargando(false);

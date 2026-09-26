@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 import CustomButton from '../components/CustomButtom';
 
 type TipoPersona = 'nino' | 'adulto';
@@ -38,19 +39,34 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
   const [tipoPersona, setTipoPersona] = useState<TipoPersona>('adulto');
   const [motivo, setMotivo] = useState<Motivo>('trabajo');
   const [generando, setGenerando] = useState(false);
-
-  const compartirPdf = async (html: string) => {
+ 
+    const compartirPdf = async (html: string) => {
     try {
       setGenerando(true);
-      const { uri } = await Print.printToFileAsync({ html });
+      const { base64 } = await Print.printToFileAsync({ html, base64: true });
+
+      if (!base64) {
+        Alert.alert('Error', 'No se pudo generar el contenido del PDF');
+        return;
+      }
+
+      const nombreArchivo = `documento-${Date.now()}.pdf`;
+      const nuevaUri = `${FileSystem.documentDirectory}${nombreArchivo}`;
+
+      await FileSystem.writeAsStringAsync(nuevaUri, base64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
       const disponible = await Sharing.isAvailableAsync();
       if (disponible) {
-        await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
+        await Sharing.shareAsync(nuevaUri, {
+          mimeType: 'application/pdf',
+          UTI: 'com.adobe.pdf',
+        });
       } else {
-        Alert.alert('PDF generado', `El archivo se guardó en: ${uri}`);
+        Alert.alert('PDF generado', `El archivo se guardó en: ${nuevaUri}`);
       }
-       } catch (error: any) {
+    } catch (error: any) {
       Alert.alert('Error', `No se pudo generar el PDF: ${error?.message ?? String(error)}`);
     } finally {
       setGenerando(false);
@@ -178,7 +194,7 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
 
         <CustomButton
           title="Volver al inicio"
-          onPress={() => navigation?.navigate('DoctorHome')}
+          onPress={() => navigation?.navigate('DoctorTabs')}
           variant="secondary"
         />
       </ScrollView>

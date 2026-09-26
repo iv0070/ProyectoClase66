@@ -1,42 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { citas, pacientes, doctores, consultas } from '../data/mockData';
-import { Cita, Consulta } from '../types';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 interface NuevaConsultaScreenProps {
   navigation?: any;
 }
 
-const doctorActual = doctores[1];
+interface CitaConfirmada {
+  id: string;
+  paciente_id: string;
+  fecha: string;
+  hora: string;
+   motivo: string | null;
+  paciente: { nombre: string } | null;
+}
 
 export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenProps) {
-  const citasConfirmadas = citas.filter(
-    (c) => c.doctorId === doctorActual.id && c.estado === 'confirmada'
-  );
+  const { user } = useAuth();
 
-  const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null);
+  const [citasConfirmadas, setCitasConfirmadas] = useState<CitaConfirmada[]>([]);
+  const [cargandoCitas, setCargandoCitas] = useState(true);
+
+  const [citaSeleccionada, setCitaSeleccionada] = useState<CitaConfirmada | null>(null);
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
   const [sintomas, setSintomas] = useState('');
   const [diagnostico, setDiagnostico] = useState('');
   const [medicamento, setMedicamento] = useState('');
+   const [notas, setNotas] = useState('');
   const [formError, setFormError] = useState('');
+  const [cargando, setCargando] = useState(false);
 
-  const getNombrePaciente = (pacienteId: string) => {
-    const paciente = pacientes.find((p) => p.id === pacienteId);
-    return paciente ? paciente.nombre : 'Paciente desconocido';
+  const cargarCitasConfirmadas = useCallback(async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('citas')
+            .select('id, paciente_id, fecha, hora, motivo, paciente:perfiles!paciente_id(nombre)')
+      .eq('doctor_id', user.id)
+      .eq('estado', 'confirmada')
+      .order('fecha', { ascending: true });
+
+    if (!error && data) {
+      setCitasConfirmadas(data as unknown as CitaConfirmada[]);
+    }
+    setCargandoCitas(false);
+  }, [user]);
+
+  useFocusEffect(
+    useCallback(() => {
+      cargarCitasConfirmadas();
+    }, [cargarCitasConfirmadas])
+  );
+
+  const getNombrePaciente = (cita: CitaConfirmada) => {
+    return cita.paciente?.nombre ?? 'Paciente desconocido';
   };
 
-  const handleSeleccionarCita = (cita: Cita) => {
+  const handleSeleccionarCita = (cita: CitaConfirmada) => {
     setCitaSeleccionada(cita);
     setFecha(cita.fecha);
     setHora(cita.hora);
     setFormError('');
   };
 
-  const handleGenerar = () => {
+  const handleGenerar = async () => {
+    if (!user) return;
+
     if (!citaSeleccionada) {
       setFormError('Debes elegir para qué paciente es la consulta');
       return;
@@ -54,28 +88,41 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
     }
 
     setFormError('');
+    setCargando(true);
 
-    const nuevaConsulta: Consulta = {
-      id: `con${Date.now()}`,
-      citaId: citaSeleccionada.id,
-      pacienteId: citaSeleccionada.pacienteId,
-      doctorId: doctorActual.id,
+    const { error: consultaError } = await supabase.from('consultas').insert({
+      cita_id: citaSeleccionada.id,
+      paciente_id: citaSeleccionada.paciente_id,
+      doctor_id: user.id,
       fecha,
       hora,
       sintomas,
       diagnostico,
       medicamento,
-    };
-    consultas.push(nuevaConsulta);
+        notas: notas.trim() || null,
+    });
 
-    const citaEnArray = citas.find((c) => c.id === citaSeleccionada.id);
-    if (citaEnArray) {
-      citaEnArray.estado = 'completada';
+    if (consultaError) {
+      setCargando(false);
+      setFormError('No se pudo guardar la consulta: ' + consultaError.message);
+      return;
+    }
+
+    const { error: citaError } = await supabase
+      .from('citas')
+      .update({ estado: 'completada' })
+      .eq('id', citaSeleccionada.id);
+
+    setCargando(false);
+
+    if (citaError) {
+      setFormError('La consulta se guardó pero no se pudo actualizar la cita: ' + citaError.message);
+      return;
     }
 
     navigation?.navigate('Documento', {
-      pacienteId: citaSeleccionada.pacienteId,
-      pacienteNombre: getNombrePaciente(citaSeleccionada.pacienteId),
+      pacienteId: citaSeleccionada.paciente_id,
+      pacienteNombre: getNombrePaciente(citaSeleccionada),
       citaId: citaSeleccionada.id,
       fecha,
       hora,
@@ -92,7 +139,9 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
         <Text style={styles.subtitle}>Elige el paciente (cita confirmada)</Text>
 
         <View style={styles.citasList}>
-          {citasConfirmadas.length === 0 ? (
+          {cargandoCitas ? (
+            <Text style={styles.emptyText}>Cargando citas...</Text>
+          ) : citasConfirmadas.length === 0 ? (
             <Text style={styles.emptyText}>No tienes citas confirmadas por ahora</Text>
           ) : (
             citasConfirmadas.map((item) => {
@@ -100,7 +149,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
               return (
                 <CustomButton
                   key={item.id}
-                  title={`${getNombrePaciente(item.pacienteId)} · ${item.fecha} ${item.hora}`}
+                  title={`${getNombrePaciente(item)} · ${item.fecha} ${item.hora}`}
                   onPress={() => handleSeleccionarCita(item)}
                   variant={seleccionada ? 'primary' : 'secondary'}
                   style={styles.citaButton}
@@ -110,14 +159,21 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
           )}
         </View>
 
-        {citaSeleccionada && (
+               {citaSeleccionada && (
           <>
+            {citaSeleccionada.motivo && (
+              <View style={styles.motivoBox}>
+                <Text style={styles.motivoLabel}>Motivo de la consulta</Text>
+                <Text style={styles.motivoTexto}>{citaSeleccionada.motivo}</Text>
+              </View>
+            )}
+
             <CustomInput
-              label="Fecha (DD/MM/AAAA)"
+              label="Fecha (AAAA-MM-DD)"
               value={fecha}
               onChangeText={setFecha}
               validationType="text"
-              placeholder="27/08/2026"
+              placeholder="2026-08-27"
             />
 
             <CustomInput
@@ -153,15 +209,28 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
               validationType="text"
               placeholder="Medicamento recetado"
             />
+               
+
+            <CustomInput
+              label="Notas / Observaciones"
+              value={notas}
+              onChangeText={setNotas}
+              validationType="text"
+              placeholder="Observaciones adicionales sobre la consulta (opcional)"
+              multiline
+            />
+
           </>
         )}
 
         {formError ? <Text style={styles.errorText}>{formError}</Text> : null}
 
         <CustomButton
-          title="Generar documentos"
+          title={cargando ? 'Guardando...' : 'Generar documentos'}
           onPress={handleGenerar}
           variant="primary"
+          disabled={cargando}
+          loading={cargando}
         />
       </ScrollView>
     </SafeAreaView>
@@ -174,7 +243,10 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', color: '#111827' },
   subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 12 },
   citasList: { marginBottom: 16 },
-  citaButton: { marginBottom: 8 },
+   citaButton: { marginBottom: 8 },
+  motivoBox: { backgroundColor: '#EFF6FF', borderRadius: 8, padding: 12, marginBottom: 16 },
+  motivoLabel: { fontSize: 12, color: '#2563EB', fontWeight: '600', marginBottom: 4 },
+  motivoTexto: { fontSize: 14, color: '#1E3A8A' },
   emptyText: { textAlign: 'center', color: '#9CA3AF', marginVertical: 12 },
   errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
 });

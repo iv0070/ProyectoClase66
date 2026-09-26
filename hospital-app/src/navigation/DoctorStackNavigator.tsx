@@ -1,13 +1,11 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import DoctorHomeScreen from '../screens/DoctorHomeScreen';
-import NuevaConsultaScreen from '../screens/NuevaConsultaScreen';
+import DoctorTabs from './DoctorTabs';
 import DocumentoScreen from '../screens/DocumentoScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import HistorialPacienteScreen from '../screens/HistorialPacienteScreen';
 
 export type DoctorStackParamList = {
-  DoctorHome: undefined;
-  NuevaConsulta: undefined;
+  DoctorTabs: undefined;
   Documento: {
     pacienteId: string;
     pacienteNombre: string;
@@ -18,7 +16,10 @@ export type DoctorStackParamList = {
     diagnostico: string;
     medicamento: string;
   };
-  Perfil: { rol: string; nombre: string; usuario: string; especialidad?: string };
+  HistorialPaciente: {
+    pacienteId: string;
+    pacienteNombre: string;
+  };
 };
 
 const Stack = createNativeStackNavigator<DoctorStackParamList>();
@@ -26,10 +27,13 @@ const Stack = createNativeStackNavigator<DoctorStackParamList>();
 export default function DoctorStackNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="DoctorHome" component={DoctorHomeScreen} />
-      <Stack.Screen name="NuevaConsulta" component={NuevaConsultaScreen} />
+      <Stack.Screen name="DoctorTabs" component={DoctorTabs} />
       <Stack.Screen name="Documento" component={DocumentoScreen} />
-      <Stack.Screen name="Perfil" component={ProfileScreen} />
+      <Stack.Screen
+        name="HistorialPaciente"
+        component={HistorialPacienteScreen}
+        options={{ headerShown: true, title: 'Historial' }}
+      />
     </Stack.Navigator>
   );
 }

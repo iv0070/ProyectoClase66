@@ -2,24 +2,28 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
-import { pacientes } from '../data/mockData';
-import { Paciente } from '../types';
+import { supabase } from '../../lib/supabase';
 
 interface NuevoPacienteScreenProps {
   navigation?: any;
 }
 
+const PASSWORD_TEMPORAL = 'Temporal123';
+
 export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenProps) {
   const [nombre, setNombre] = useState('');
-  const [edad, setEdad] = useState('');
+  const [email, setEmail] = useState('');
+  const [fechaNacimiento, setFechaNacimiento] = useState(''); // DD/MM/AAAA
   const [telefono, setTelefono] = useState('');
   const [identidad, setIdentidad] = useState('');
   const [formError, setFormError] = useState('');
+  const [cargando, setCargando] = useState(false);
 
-  const handleCrear = () => {
+  const handleCrear = async () => {
     if (
       nombre.trim() === '' ||
-      edad.trim() === '' ||
+      email.trim() === '' ||
+      fechaNacimiento.trim() === '' ||
       telefono.trim() === '' ||
       identidad.trim() === ''
     ) {
@@ -33,37 +37,72 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
       return;
     }
 
-    if (isNaN(Number(edad))) {
-      setFormError('La edad debe ser un número');
+    if (!email.includes('@')) {
+      setFormError('Ingresa un correo electrónico válido');
       return;
     }
 
-    const yaExiste = pacientes.some((p) => p.identidad === identidad.trim());
-    if (yaExiste) {
-      setFormError('Ya existe un paciente registrado con esa identidad');
+    // DD/MM/AAAA -> AAAA-MM-DD (formato que espera Supabase)
+    const partesFecha = fechaNacimiento.trim().split('/');
+    if (partesFecha.length !== 3) {
+      setFormError('La fecha de nacimiento debe tener el formato DD/MM/AAAA');
       return;
     }
+    const [dia, mes, anio] = partesFecha;
+    const fechaISO = `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
 
     setFormError('');
+    setCargando(true);
 
-    const nuevoPaciente: Paciente = {
-      id: `p${Date.now()}`,
+    const usuario = nombre.trim().toLowerCase().replace(/\s+/g, '.');
+
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: email.trim(),
+      password: PASSWORD_TEMPORAL,
+    });
+
+    if (authError) {
+      setCargando(false);
+      if (authError.message.includes('already registered')) {
+        setFormError('Ya existe una cuenta registrada con ese correo');
+      } else {
+        setFormError('No se pudo crear la cuenta: ' + authError.message);
+      }
+      return;
+    }
+
+    if (!authData.user) {
+      setCargando(false);
+      setFormError('No se pudo crear la cuenta, intenta de nuevo');
+      return;
+    }
+
+    const { error: perfilError } = await supabase.from('perfiles').insert({
+      id: authData.user.id,
+      rol: 'paciente',
+      usuario,
+      email: email.trim(),
       nombre: nombre.trim(),
-      usuario: nombre.trim().toLowerCase().replace(/\s+/g, '.'),
-      contrasena: '123456',
-      edad: Number(edad),
       telefono: telefono.trim(),
+      fecha_nacimiento: fechaISO,
       identidad: identidad.trim(),
-    };
-    pacientes.push(nuevoPaciente);
+      debe_cambiar_password: true,
+    });
+
+    setCargando(false);
+
+    if (perfilError) {
+      setFormError('La cuenta se creó pero hubo un error guardando el perfil: ' + perfilError.message);
+      return;
+    }
 
     Alert.alert(
       'Paciente creado',
-      `${nombre} fue registrado correctamente`,
+      `${nombre.trim()} fue registrado correctamente.\n\nUsuario: ${usuario}\nContraseña temporal: ${PASSWORD_TEMPORAL}\n\nSe cerró tu sesión de recepción, deberás iniciar sesión de nuevo.`,
       [
         {
           text: 'OK',
-          onPress: () => navigation?.navigate('ReceptionHome'),
+          onPress: () => navigation?.reset({ index: 0, routes: [{ name: 'Login' }] }),
         },
       ]
     );
@@ -84,6 +123,14 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
         />
 
         <CustomInput
+          label="Correo electrónico"
+          value={email}
+          onChangeText={setEmail}
+          validationType="email"
+          placeholder="paciente@ejemplo.com"
+        />
+
+        <CustomInput
           label="Número de identidad"
           value={identidad}
           onChangeText={setIdentidad}
@@ -92,12 +139,11 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
         />
 
         <CustomInput
-          label="Edad"
-          value={edad}
-          onChangeText={setEdad}
+          label="Fecha de nacimiento (DD/MM/AAAA)"
+          value={fechaNacimiento}
+          onChangeText={setFechaNacimiento}
           validationType="text"
-          placeholder="Edad"
-          keyboardType="numeric"
+          placeholder="15/03/1990"
         />
 
         <CustomInput
@@ -111,9 +157,11 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
         {formError ? <Text style={styles.errorText}>{formError}</Text> : null}
 
         <CustomButton
-          title="Crear paciente"
+          title={cargando ? 'Creando...' : 'Crear paciente'}
           onPress={handleCrear}
           variant="primary"
+          disabled={cargando}
+          loading={cargando}
         />
       </ScrollView>
     </SafeAreaView>
@@ -121,29 +169,9 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  container: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6B7280',
-    marginTop: 4,
-    marginBottom: 20,
-  },
-  errorText: {
-    color: '#DC2626',
-    fontSize: 14,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
+  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flexGrow: 1, padding: 20 },
+  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
+  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 20 },
+  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
 });
