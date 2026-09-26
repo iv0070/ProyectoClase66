@@ -1,9 +1,5 @@
 import React, { useState, useCallback } from 'react';
-<<<<<<< HEAD
-import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert } from 'react-native';
-=======
 import { View, Text, FlatList, StyleSheet, SafeAreaView, Alert, TouchableOpacity } from 'react-native';
->>>>>>> origin/ramaIv
 import { useFocusEffect } from '@react-navigation/native';
 import CustomButton from '../components/CustomButtom';
 import CustomInput from '../components/CustomInput';
@@ -14,11 +10,8 @@ interface DoctorHomeScreenProps {
   navigation?: any;
 }
 
-<<<<<<< HEAD
-=======
 type Estado = 'pendiente' | 'confirmada' | 'completada' | 'rechazada' | 'cancelada' | 'reprogramacion_sugerida';
 
->>>>>>> origin/ramaIv
 interface CitaConPaciente {
   id: string;
   paciente_id: string;
@@ -46,21 +39,14 @@ const FILTROS: { key: FiltroEstado; label: string }[] = [
 ];
 
 export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [citas, setCitas] = useState<CitaConPaciente[]>([]);
   const [cargando, setCargando] = useState(true);
-<<<<<<< HEAD
-  const [citaEnReprogramacion, setCitaEnReprogramacion] = useState<string | null>(null);
-  const [nuevaFecha, setNuevaFecha] = useState('');
-  const [nuevaHora, setNuevaHora] = useState('');
-  const [reprogramarError, setReprogramarError] = useState('');
-=======
   const [filtro, setFiltro] = useState<FiltroEstado>('todas');
   const [citaEnSugerencia, setCitaEnSugerencia] = useState<string | null>(null);
   const [fechaSugerida, setFechaSugerida] = useState('');
   const [horaSugerida, setHoraSugerida] = useState('');
   const [sugerenciaError, setSugerenciaError] = useState('');
->>>>>>> origin/ramaIv
 
   const cargarCitas = useCallback(async () => {
     if (!user) return;
@@ -132,8 +118,6 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     cargarCitas();
   };
 
-<<<<<<< HEAD
-=======
   const handleRechazarSinMas = async (citaId: string) => {
     const { error } = await supabase
       .from('citas')
@@ -147,7 +131,6 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     cargarCitas();
   };
 
->>>>>>> origin/ramaIv
   const handleRechazar = (citaId: string) => {
     Alert.alert(
       'Rechazar cita',
@@ -181,15 +164,9 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     setSugerenciaError('');
   };
 
-<<<<<<< HEAD
-  const handleConfirmarReprogramacion = async (citaId: string) => {
-    if (nuevaFecha.trim() === '' || nuevaHora.trim() === '') {
-      setReprogramarError('Debes ingresar fecha y hora nuevas');
-=======
   const handleEnviarSugerencia = async (citaId: string) => {
     if (fechaSugerida.trim() === '' || horaSugerida.trim() === '') {
       setSugerenciaError('Debes ingresar fecha y hora sugeridas');
->>>>>>> origin/ramaIv
       return;
     }
 
@@ -215,14 +192,6 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     cargarCitas();
   };
 
-<<<<<<< HEAD
-  const handleCerrarSesion = async () => {
-    await logout();
-    navigation?.reset({ index: 0, routes: [{ name: 'Login' }] });
-  };
-
-=======
->>>>>>> origin/ramaIv
   const renderCita = ({ item }: { item: CitaConPaciente }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
