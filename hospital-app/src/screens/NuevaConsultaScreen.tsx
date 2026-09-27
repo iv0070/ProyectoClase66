@@ -116,7 +116,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
     setCargando(false);
 
     if (citaError) {
-      setFormError('La consulta se guardó pero no se pudo actualizar la cita: ' + citaError.message);
+      setFormError('La consulta se guardo pero no se pudo actualizar la cita: ' + citaError.message);
       return;
     }
 
@@ -189,7 +189,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
               value={sintomas}
               onChangeText={setSintomas}
               validationType="text"
-              placeholder="Describe los síntomas"
+              placeholder="Describe los sintomas"
               multiline
             />
 
@@ -198,7 +198,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
               value={diagnostico}
               onChangeText={setDiagnostico}
               validationType="text"
-              placeholder="Diagnóstico médico"
+              placeholder="Diagnostico medico"
               multiline
             />
 
@@ -238,15 +238,66 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flexGrow: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
-  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 12 },
-  citasList: { marginBottom: 16 },
-   citaButton: { marginBottom: 8 },
-  motivoBox: { backgroundColor: '#EFF6FF', borderRadius: 8, padding: 12, marginBottom: 16 },
-  motivoLabel: { fontSize: 12, color: '#2563EB', fontWeight: '600', marginBottom: 4 },
-  motivoTexto: { fontSize: 14, color: '#1E3A8A' },
-  emptyText: { textAlign: 'center', color: '#9CA3AF', marginVertical: 12 },
-  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9FAFB'
+  },
+
+  container: {
+    flexGrow: 1,
+    padding: 20
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827'
+  },
+
+  subtitle: {
+    fontSize: 15,
+    color: '#6B7280',
+    marginTop: 4,
+    marginBottom: 12
+  },
+
+  citasList: {
+    marginBottom: 16
+  },
+
+  citaButton: {
+    marginBottom: 8
+  },
+
+  motivoBox: {
+    backgroundColor: '#EFF6FF',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16
+  },
+
+  motivoLabel: {
+    fontSize: 12,
+    color: '#2563EB',
+    fontWeight: '600',
+    marginBottom: 4
+  },
+
+  motivoTexto: {
+    fontSize: 14,
+    color: '#1E3A8A'
+  },
+
+  emptyText: {
+    textAlign: 'center',
+    color: '#9CA3AF',
+    marginVertical: 12
+  },
+
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: 'center'
+  },
 });

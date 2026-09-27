@@ -94,20 +94,60 @@ export default function HistorialPacienteScreen({ route }: HistorialPacienteScre
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
-  subtitle: { fontSize: 14, color: '#6B7280', marginTop: 2, marginBottom: 16 },
-  vacio: { fontSize: 14, color: '#6B7280', textAlign: 'center', marginTop: 40 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9FAFB'
+  },
+
+  container: {
+    flex: 1,
+    padding: 20
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827'
+  },
+
+  subtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 2,
+    marginBottom: 16
+  },
+
+  vacio: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 40
+  },
+
   card: {
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E5E7EB'
   },
-  cardFecha: { fontSize: 13, color: '#6B7280', marginBottom: 10, fontWeight: '600' },
-  cardLabel: { fontSize: 12, color: '#9CA3AF', marginTop: 8 },
-  cardTexto: { fontSize: 14, color: '#374151' },
+
+  cardFecha: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginBottom: 10,
+    fontWeight: '600'
+  },
+
+  cardLabel: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 8
+  },
+
+  cardTexto: {
+    fontSize: 14,
+    color: '#374151'
+  },
 });

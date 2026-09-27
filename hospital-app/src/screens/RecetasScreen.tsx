@@ -176,18 +176,98 @@ export default function RecetasScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: '700', color: '#111827', marginBottom: 16 },
-  subtitle: { fontSize: 14, fontWeight: '600', color: '#374151', marginTop: 16, marginBottom: 8 },
-  vacio: { fontSize: 14, color: '#6B7280', textAlign: 'center', marginTop: 40 },
-  consultaCard: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: '#E5E7EB' },
-  consultaFecha: { fontSize: 13, color: '#6B7280' },
-  consultaMedicamento: { fontSize: 15, fontWeight: '600', color: '#111827', marginTop: 4 },
-  farmaciaCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#E5E7EB' },
-  farmaciaCardSeleccionada: { borderColor: '#2563EB', backgroundColor: '#EFF6FF' },
-  farmaciaNombre: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  farmaciaDescuento: { fontSize: 12, color: '#16A34A', marginTop: 2 },
-  radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: '#D1D5DB' },
-  radioSeleccionado: { borderColor: '#2563EB', backgroundColor: '#2563EB' },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9FAFB'
+  },
+
+  container: {
+    flex: 1,
+    padding: 20
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 16
+  },
+
+  subtitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginTop: 16,
+    marginBottom: 8
+  },
+
+  vacio: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 40
+  },
+
+  consultaCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB'
+  },
+
+  consultaFecha: {
+    fontSize: 13,
+    color: '#6B7280'
+  },
+
+  consultaMedicamento: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+    marginTop: 4
+  },
+
+  farmaciaCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB'
+  },
+
+  farmaciaCardSeleccionada: {
+    borderColor: '#2563EB',
+    backgroundColor: '#EFF6FF'
+  },
+
+  farmaciaNombre: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827'
+  },
+
+  farmaciaDescuento: {
+    fontSize: 12,
+    color: '#16A34A',
+    marginTop: 2
+  },
+
+  radio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#D1D5DB'
+  },
+
+  radioSeleccionado: {
+    borderColor: '#2563EB',
+    backgroundColor: '#2563EB'
+  },
 });

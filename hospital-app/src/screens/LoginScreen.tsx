@@ -69,16 +69,68 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     </KeyboardAvoidingView>
   );
 }
-
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: { flexGrow: 1, justifyContent: 'center', padding: 24, backgroundColor: '#F9FAFB' },
-  logo: { width: 90, height: 90, alignSelf: 'center', marginBottom: 16, borderRadius: 20 },
-  title: { fontSize: 26, fontWeight: '700', color: '#111827', textAlign: 'center', marginBottom: 4 },
-  subtitle: { fontSize: 15, color: '#6B7280', textAlign: 'center', marginBottom: 32 },
-  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
-  registroContainer: { marginTop: 16, alignItems: 'center' },
-  registroTexto: { fontSize: 14, color: '#6B7280' },
-  registroLink: { color: '#2563EB', fontWeight: '600', textDecorationLine: 'underline' },
-  hintText: { fontSize: 12, color: '#9CA3AF', textAlign: 'center', marginTop: 16 },
+  flex: {
+    flex: 1
+  },
+
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: '#F9FAFB'
+  },
+
+  logo: {
+    width: 90,
+    height: 90,
+    alignSelf: 'center',
+    marginBottom: 16,
+    borderRadius: 20
+  },
+
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#111827',
+    textAlign: 'center',
+    marginBottom: 4
+  },
+
+  subtitle: {
+    fontSize: 15,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 32
+  },
+
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: 'center'
+  },
+
+  registroContainer: {
+    marginTop: 16,
+    alignItems: 'center'
+  },
+
+  registroTexto: {
+    fontSize: 14,
+    color: '#6B7280'
+  },
+
+  registroLink: {
+    color: '#2563EB',
+    fontWeight: '600',
+    textDecorationLine: 'underline'
+  },
+
+  hintText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    marginTop: 16
+  },
 });

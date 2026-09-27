@@ -74,7 +74,7 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
-          <Text style={styles.title}>No hay sesión activa</Text>
+          <Text style={styles.title}>No hay sesion activa</Text>
         </View>
       </SafeAreaView>
     );
@@ -310,28 +310,151 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
-  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 12 },
-  filtrosRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
-  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: '#D1D5DB', backgroundColor: '#fff' },
-  chipActivo: { backgroundColor: '#2563EB', borderColor: '#2563EB' },
-  chipTexto: { fontSize: 13, color: '#374151' },
-  chipTextoActivo: { color: '#fff', fontWeight: '600' },
-  list: { paddingBottom: 20 },
-  card: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#E5E7EB' },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  pacienteNombre: { fontSize: 16, fontWeight: '600', color: '#111827' },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { color: '#fff', fontSize: 12, fontWeight: '600', textTransform: 'capitalize' },
-  hora: { fontSize: 13, color: '#6B7280', marginTop: 6 },
-  tipoConsulta: { fontSize: 12, color: '#2563EB', marginTop: 4, fontWeight: '600' },
-  motivo: { fontSize: 13, color: '#374151', marginTop: 4 },
-  sugerenciaTexto: { fontSize: 13, color: '#7C3AED', marginTop: 6, fontWeight: '600' },
-  accionesRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
-  accionButton: { flex: 1 },
-  sugerenciaBox: { marginTop: 10, borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 10 },
-  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 8, textAlign: 'center' },
-  emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 40 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9FAFB'
+  },
+
+  container: {
+    flex: 1,
+    padding: 20
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827'
+  },
+
+  subtitle: {
+    fontSize: 15,
+    color: '#6B7280',
+    marginTop: 4,
+    marginBottom: 12
+  },
+
+  filtrosRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16
+  },
+
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    backgroundColor: '#fff'
+  },
+
+  chipActivo: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB'
+  },
+
+  chipTexto: {
+    fontSize: 13,
+    color: '#374151'
+  },
+
+  chipTextoActivo: {
+    color: '#fff',
+    fontWeight: '600'
+  },
+
+  list: {
+    paddingBottom: 20
+  },
+
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB'
+  },
+
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+
+  pacienteNombre: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827'
+  },
+
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12
+  },
+
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize'
+  },
+
+  hora: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 6
+  },
+
+  tipoConsulta: {
+    fontSize: 12,
+    color: '#2563EB',
+    marginTop: 4,
+    fontWeight: '600'
+  },
+
+  motivo: {
+    fontSize: 13,
+    color: '#374151',
+    marginTop: 4
+  },
+
+  sugerenciaTexto: {
+    fontSize: 13,
+    color: '#7C3AED',
+    marginTop: 6,
+    fontWeight: '600'
+  },
+
+  accionesRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10
+  },
+
+  accionButton: {
+    flex: 1
+  },
+
+  sugerenciaBox: {
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 10
+  },
+
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    marginBottom: 8,
+    textAlign: 'center'
+  },
+
+  emptyText: {
+    textAlign: 'center',
+    color: '#9CA3AF',
+    marginTop: 40
+  },
 });

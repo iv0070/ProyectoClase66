@@ -226,7 +226,7 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           style={{ marginTop: 10 }}
         />
         <CustomButton
-          title="Cerrar sesión"
+          title="Cerrar sesion"
           onPress={handleCerrarSesion}
           variant="danger"
           style={{ marginTop: 10 }}
@@ -237,19 +237,95 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
-  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 16 },
-  list: { paddingBottom: 20 },
-  card: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#E5E7EB' },
-  nombre: { fontSize: 16, fontWeight: '600', color: '#111827' },
-  detalle: { fontSize: 13, color: '#6B7280', marginTop: 4 },
-  accion: { fontSize: 12, color: '#2563EB', marginTop: 6, fontWeight: '600' },
-  detalleBox: { marginTop: 12, borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 10 },
-  detalleTitulo: { fontSize: 12, fontWeight: '700', color: '#374151', marginTop: 8, marginBottom: 4 },
-  detalleTexto: { fontSize: 13, color: '#111827', marginBottom: 2 },
-  detalleVacio: { fontSize: 13, color: '#9CA3AF', fontStyle: 'italic' },
-  agendarButton: { marginTop: 12 },
-  emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 30 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9FAFB'
+  },
+
+  container: {
+    flex: 1,
+    padding: 20
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827'
+  },
+
+  subtitle: {
+    fontSize: 15,
+    color: '#6B7280',
+    marginTop: 4,
+    marginBottom: 16
+  },
+
+  list: {
+    paddingBottom: 20
+  },
+
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB'
+  },
+
+  nombre: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827'
+  },
+
+  detalle: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 4
+  },
+
+  accion: {
+    fontSize: 12,
+    color: '#2563EB',
+    marginTop: 6,
+    fontWeight: '600'
+  },
+
+  detalleBox: {
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 10
+  },
+
+  detalleTitulo: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#374151',
+    marginTop: 8,
+    marginBottom: 4
+  },
+
+  detalleTexto: {
+    fontSize: 13,
+    color: '#111827',
+    marginBottom: 2
+  },
+
+  detalleVacio: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    fontStyle: 'italic'
+  },
+
+  agendarButton: {
+    marginTop: 12
+  },
+
+  emptyText: {
+    textAlign: 'center',
+    color: '#9CA3AF',
+    marginTop: 30
+  },
 });

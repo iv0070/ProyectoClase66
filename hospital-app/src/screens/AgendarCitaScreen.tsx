@@ -88,6 +88,7 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
     cargarCitasDelDoctor(doctor.id);
   };
 
+
   function estaLlenoElDia(fechaStr: string): boolean {
     const ocupadasEseDia = citasOcupadas.filter((c) => c.fecha === fechaStr);
     return ocupadasEseDia.length >= HORARIOS_DISPONIBLES.length;
@@ -155,7 +156,7 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
 
     Alert.alert(
       'Cita agendada',
-      `La cita de ${pacienteNombre} con ${doctorSeleccionado.nombre} quedó en estado pendiente, esperando confirmación.`,
+      `La cita de ${pacienteNombre} con ${doctorSeleccionado.nombre} quedo en estado pendiente, esperando confirmacion.`,
       [{ text: 'OK', onPress: () => navigation?.goBack() }]
     );
   };
@@ -262,7 +263,7 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
               value={motivo}
               onChangeText={setMotivo}
               validationType="text"
-              placeholder="Describe brevemente tu síntoma o motivo"
+              placeholder="Describe brevemente tu sintoma o motivo"
               multiline
             />
           </>
@@ -283,17 +284,80 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flexGrow: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
-  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 16 },
-  label: { fontSize: 14, fontWeight: '600', color: '#374151', marginTop: 16, marginBottom: 8 },
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: '#D1D5DB', backgroundColor: '#fff' },
-  chipActivo: { backgroundColor: '#2563EB', borderColor: '#2563EB' },
-  chipTexto: { fontSize: 13, color: '#374151' },
-  chipTextoActivo: { color: '#fff', fontWeight: '600' },
-  doctorButton: { marginBottom: 8 },
-  emptyText: { fontSize: 13, color: '#9CA3AF', fontStyle: 'italic' },
-  errorText: { color: '#DC2626', fontSize: 14, marginTop: 16, marginBottom: 8, textAlign: 'center' },
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: '#F9FAFB' 
+  },
+
+  container: {
+     flexGrow: 1, 
+    padding: 20 
+  },
+
+  title: {
+     fontSize: 22, 
+    fontWeight: '700', 
+    color: '#111827'
+   },
+  
+   subtitle: { 
+    fontSize: 15, 
+    color: '#6B7280', 
+    marginTop: 4, 
+    marginBottom: 16 
+  },
+
+  label: { 
+    fontSize: 14, 
+    fontWeight: '600', 
+    color: '#374151', 
+    marginTop: 16, 
+    marginBottom: 8 
+  },
+
+  chipsRow: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    gap: 8 
+  },
+
+  chip: {
+     paddingHorizontal: 14, 
+     paddingVertical: 8, 
+     borderRadius: 20, 
+     borderWidth: 1, 
+     borderColor: '#D1D5DB', 
+     backgroundColor: '#fff' 
+    },
+
+  chipActivo: { 
+    backgroundColor: '#2563EB', 
+    borderColor: '#2563EB' },
+
+  chipTexto: {
+     fontSize: 13,
+      color: '#374151'
+    
+  },
+  chipTextoActivo: { 
+    color: '#fff', 
+    fontWeight: '600' 
+  },
+
+  doctorButton: {
+     marginBottom: 8 
+    },
+  emptyText: {
+     fontSize: 13,
+      color: '#9CA3AF', 
+      fontStyle: 'italic'
+     },
+
+  errorText: {
+     color: '#DC2626', 
+     fontSize: 14, 
+     marginTop: 16,
+      marginBottom: 8, 
+      textAlign: 'center' 
+    },
 });

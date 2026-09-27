@@ -188,28 +188,143 @@ export default function FacturacionScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: '700', color: '#111827', marginBottom: 20 },
-  vacio: { fontSize: 14, color: '#6B7280', textAlign: 'center', marginTop: 40 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 18, borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 12 },
-  filaEntre: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 6 },
-  especialidad: { fontSize: 16, fontWeight: '700', color: '#111827', textTransform: 'capitalize' },
-  fecha: { fontSize: 12, color: '#9CA3AF' },
-  linea: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 10 },
-  label: { fontSize: 14, color: '#374151' },
-  valor: { fontSize: 14, color: '#111827', fontWeight: '600' },
-  labelDescuento: { fontSize: 13, color: '#16A34A' },
-  valorDescuento: { fontSize: 13, color: '#16A34A', fontWeight: '600' },
-  labelTotal: { fontSize: 16, fontWeight: '700', color: '#111827' },
-  valorTotal: { fontSize: 20, fontWeight: '800', color: '#2563EB' },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  badgeVerde: { backgroundColor: '#DCFCE7' },
-  badgeGris: { backgroundColor: '#F3F4F6' },
-  badgeTexto: { fontSize: 11, fontWeight: '600' },
-  badgeTextoVerde: { color: '#16A34A' },
-  badgeTextoGris: { color: '#6B7280' },
-  totalGeneralBox: { backgroundColor: '#111827', borderRadius: 12, padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  totalGeneralLabel: { fontSize: 14, color: '#D1D5DB', fontWeight: '600' },
-  totalGeneralValor: { fontSize: 22, fontWeight: '800', color: '#fff' },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9FAFB'
+  },
+
+  container: {
+    flex: 1,
+    padding: 20
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 20
+  },
+
+  vacio: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 40
+  },
+
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginBottom: 12
+  },
+
+  filaEntre: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 6
+  },
+
+  especialidad: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+    textTransform: 'capitalize'
+  },
+
+  fecha: {
+    fontSize: 12,
+    color: '#9CA3AF'
+  },
+
+  linea: {
+    height: 1,
+    backgroundColor: '#E5E7EB',
+    marginVertical: 10
+  },
+
+  label: {
+    fontSize: 14,
+    color: '#374151'
+  },
+
+  valor: {
+    fontSize: 14,
+    color: '#111827',
+    fontWeight: '600'
+  },
+
+  labelDescuento: {
+    fontSize: 13,
+    color: '#16A34A'
+  },
+
+  valorDescuento: {
+    fontSize: 13,
+    color: '#16A34A',
+    fontWeight: '600'
+  },
+
+  labelTotal: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827'
+  },
+
+  valorTotal: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#2563EB'
+  },
+
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20
+  },
+
+  badgeVerde: {
+    backgroundColor: '#DCFCE7'
+  },
+
+  badgeGris: {
+    backgroundColor: '#F3F4F6'
+  },
+
+  badgeTexto: {
+    fontSize: 11,
+    fontWeight: '600'
+  },
+
+  badgeTextoVerde: {
+    color: '#16A34A'
+  },
+
+  badgeTextoGris: {
+    color: '#6B7280'
+  },
+
+  totalGeneralBox: {
+    backgroundColor: '#111827',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+
+  totalGeneralLabel: {
+    fontSize: 14,
+    color: '#D1D5DB',
+    fontWeight: '600'
+  },
+
+  totalGeneralValor: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#fff'
+  },
 });

@@ -108,9 +108,36 @@ export default function CambiarPasswordObligatorioScreen({
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flex: 1, padding: 24, justifyContent: 'center' },
-  title: { fontSize: 24, fontWeight: '700', color: '#111827', textAlign: 'center', marginBottom: 8 },
-  subtitle: { fontSize: 14, color: '#6B7280', textAlign: 'center', marginBottom: 24 },
-  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
+  safeArea: {
+     flex: 1, 
+     backgroundColor: '#F9FAFB' 
+    },
+
+  container: { 
+    flex: 1, 
+    padding: 24, 
+    justifyContent: 'center'
+   },
+
+  title: {
+     fontSize: 24, 
+     fontWeight: '700', 
+     color: '#111827', 
+     textAlign: 'center',
+      marginBottom: 8 
+    },
+    
+  subtitle: { 
+    fontSize: 14, 
+    color: '#6B7280', 
+    textAlign: 'center', 
+    marginBottom: 24 
+  },
+
+  errorText: {
+     color: '#DC2626',
+      fontSize: 14, 
+      marginBottom: 12, 
+      textAlign: 'center' 
+    },
 });

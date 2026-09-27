@@ -64,7 +64,7 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
           UTI: 'com.adobe.pdf',
         });
       } else {
-        Alert.alert('PDF generado', `El archivo se guardó en: ${nuevaUri}`);
+        Alert.alert('PDF generado', `El archivo se guardo en: ${nuevaUri}`);
       }
     } catch (error: any) {
       Alert.alert('Error', `No se pudo generar el PDF: ${error?.message ?? String(error)}`);
@@ -86,7 +86,7 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
           <p><strong>Medicamento recetado:</strong> ${datos.medicamento}</p>
           <br />
           <p style="font-size: 12px; color: #6B7280;">
-            Documento generado por Sistema Hospitalario Móvil. Sin firma digital certificada.
+            Documento generado por Sistema Hospitalario Movil. Sin firma digital certificada.
           </p>
         </body>
       </html>
