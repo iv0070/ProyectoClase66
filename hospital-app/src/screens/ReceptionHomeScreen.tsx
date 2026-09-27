@@ -208,29 +208,7 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
           }
         />
 
-        <CustomButton
-          title="Crear paciente nuevo"
-          onPress={() => navigation?.navigate('NuevoPaciente')}
-          variant="primary"
-        />
-        <CustomButton
-          title="Ver perfil"
-          onPress={() =>
-            navigation?.navigate('Perfil', {
-              rol: 'recepcion',
-              nombre: user?.nombre,
-              usuario: user?.usuario,
-            })
-          }
-          variant="secondary"
-          style={{ marginTop: 10 }}
-        />
-        <CustomButton
-          title="Cerrar sesion"
-          onPress={handleCerrarSesion}
-          variant="danger"
-          style={{ marginTop: 10 }}
-        />
+      
       </View>
     </SafeAreaView>
   );

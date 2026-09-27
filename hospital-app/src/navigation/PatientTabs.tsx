@@ -1,13 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
 
 import PacienteHomeScreen from '../screens/PacienteHomeScreen';
 import ConsultasScreen from '../screens/ConsultasScreen';
 import RecetasScreen from '../screens/RecetasScreen';
 import FacturacionScreen from '../screens/FacturacionScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-
 
 export type PatientTabsParamList = {
   Inicio: undefined;
@@ -20,12 +20,17 @@ export type PatientTabsParamList = {
 const Tab = createBottomTabNavigator<PatientTabsParamList>();
 
 export default function PatientTabs() {
+  const { colores } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: true,
+        headerStyle: { backgroundColor: colores.fondoCard },
+        headerTintColor: colores.texto,
+        tabBarStyle: { backgroundColor: colores.fondoCard, borderTopColor: colores.borde },
         tabBarActiveTintColor: '#2563EB',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarInactiveTintColor: colores.textoSecundario,
         tabBarIcon: ({ color, size }) => {
           const iconos: Record<string, keyof typeof Ionicons.glyphMap> = {
             Inicio: 'home-outline',

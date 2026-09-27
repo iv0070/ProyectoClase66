@@ -1,15 +1,8 @@
-<<<<<<< HEAD
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Especialidad } from '../types';
-
-=======
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { doctores, recepcionistas } from '../data/mockData';
->>>>>>> c69ffc3cd2906ce6d544b1af5b367a35bf36805f
 import { supabase } from '../../lib/supabase';
 
 export type Rol = 'doctor' | 'paciente' | 'recepcion';
-type Especialidad = string;
 
 export interface AuthUser {
   id: string;
@@ -60,12 +53,11 @@ function calcularEdad(fechaNacimiento: string): number {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Revisa si ya hay una sesión de Supabase guardada al abrir la app
     supabase.auth.getSession().finally(() => setLoading(false));
   }, []);
 
@@ -74,7 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { exito: false, error: 'Debes ingresar usuario y contraseña' };
     }
 
-    // 1. Buscar el perfil en Supabase por el campo "usuario"
     const { data: perfil, error: perfilError } = await supabase
       .from('perfiles')
       .select('id, email, rol, nombre, usuario, especialidad, telefono, fecha_nacimiento, debe_cambiar_password')
@@ -82,7 +73,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .single();
 
     if (perfil && !perfilError) {
-      // 2. Existe en Supabase: intentar login real
       const { error: authError } = await supabase.auth.signInWithPassword({
         email: perfil.email,
         password: contrasena,
@@ -108,35 +98,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(nuevoUsuario);
       return { exito: true, rol: perfil.rol, debeCambiarPassword: perfil.debe_cambiar_password };
     }
-
-<<<<<<< HEAD
-  
-    
-=======
-    // 3. No existe en Supabase: revisar el mock (temporal, doctor/recepcion)
-    const doctorValido = doctores.find((d) => d.usuario === usuario && d.contrasena === contrasena);
-    if (doctorValido) {
-      setUser({
-        rol: 'doctor',
-        id: doctorValido.id,
-        nombre: doctorValido.nombre,
-        usuario: doctorValido.usuario,
-        especialidad: doctorValido.especialidad,
-      });
-      return { exito: true, rol: 'doctor' };
-    }
-
-    const recepcionistaValido = recepcionistas.find((r) => r.usuario === usuario && r.contrasena === contrasena);
-    if (recepcionistaValido) {
-      setUser({
-        rol: 'recepcion',
-        id: recepcionistaValido.id,
-        nombre: recepcionistaValido.nombre,
-        usuario: recepcionistaValido.usuario,
-      });
-      return { exito: true, rol: 'recepcion' };
-    }
->>>>>>> c69ffc3cd2906ce6d544b1af5b367a35bf36805f
 
     return { exito: false, error: 'Usuario o contraseña incorrectos' };
   };

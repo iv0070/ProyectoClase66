@@ -6,6 +6,7 @@ import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface AgendarCitaScreenProps {
   navigation?: any;
@@ -31,6 +32,7 @@ interface DoctorReal {
 }
 
 export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScreenProps) {
+  const { colores, tema } = useTheme();
   const { user } = useAuth();
 
   const pacienteIdParam = route?.params?.pacienteId;
@@ -165,24 +167,28 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
     : [];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Agendar cita</Text>
-        <Text style={styles.subtitle}>Para {pacienteNombre}</Text>
+        <Text style={[styles.title, { color: colores.texto }]}>Agendar cita</Text>
+        <Text style={[styles.subtitle, { color: colores.textoSecundario }]}>Para {pacienteNombre}</Text>
 
-        <Text style={styles.label}>Especialidad</Text>
+        <Text style={[styles.label, { color: colores.textoSecundario }]}>Especialidad</Text>
         <View style={styles.chipsRow}>
           {especialidades.map((esp) => (
             <TouchableOpacity
               key={esp}
-              style={[styles.chip, especialidadElegida === esp && styles.chipActivo]}
+              style={[
+                styles.chip,
+                { backgroundColor: colores.fondoCard, borderColor: colores.borde },
+                especialidadElegida === esp && styles.chipActivo,
+              ]}
               onPress={() => {
                 setEspecialidadElegida(esp);
                 setDoctorSeleccionado(null);
                 setFechaSeleccionada(null);
               }}
             >
-              <Text style={[styles.chipTexto, especialidadElegida === esp && styles.chipTextoActivo]}>
+              <Text style={[styles.chipTexto, { color: colores.textoSecundario }, especialidadElegida === esp && styles.chipTextoActivo]}>
                 {nombresEspecialidad[esp] ?? esp}
               </Text>
             </TouchableOpacity>
@@ -191,7 +197,7 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
 
         {especialidadElegida && (
           <>
-            <Text style={styles.label}>Doctor</Text>
+            <Text style={[styles.label, { color: colores.textoSecundario }]}>Doctor</Text>
             {doctoresFiltrados.map((doc) => (
               <CustomButton
                 key={doc.id}
@@ -206,32 +212,44 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
 
         {doctorSeleccionado && (
           <>
-            <Text style={styles.label}>Fecha</Text>
+            <Text style={[styles.label, { color: colores.textoSecundario }]}>Fecha</Text>
             <Calendar
               minDate={new Date().toISOString().split('T')[0]}
               markedDates={generarFechasMarcadas()}
-             onDayPress={(day: { dateString: string }) => {
+              onDayPress={(day: { dateString: string }) => {
                 if (!estaLlenoElDia(day.dateString)) {
                   setFechaSeleccionada(day.dateString);
                   setHoraSeleccionada(null);
                 }
               }}
-              theme={{ todayTextColor: '#2563EB', selectedDayBackgroundColor: '#2563EB', arrowColor: '#2563EB' }}
+              theme={{
+                todayTextColor: '#2563EB',
+                selectedDayBackgroundColor: '#2563EB',
+                arrowColor: '#2563EB',
+                calendarBackground: colores.fondoCard,
+                dayTextColor: colores.texto,
+                monthTextColor: colores.texto,
+                textDisabledColor: colores.textoSecundario,
+              }}
             />
           </>
         )}
 
         {fechaSeleccionada && (
           <>
-            <Text style={styles.label}>Hora</Text>
+            <Text style={[styles.label, { color: colores.textoSecundario }]}>Hora</Text>
             <View style={styles.chipsRow}>
               {horasDisponibles.map((h) => (
                 <TouchableOpacity
                   key={h}
-                  style={[styles.chip, horaSeleccionada === h && styles.chipActivo]}
+                  style={[
+                    styles.chip,
+                    { backgroundColor: colores.fondoCard, borderColor: colores.borde },
+                    horaSeleccionada === h && styles.chipActivo,
+                  ]}
                   onPress={() => setHoraSeleccionada(h)}
                 >
-                  <Text style={[styles.chipTexto, horaSeleccionada === h && styles.chipTextoActivo]}>{h}</Text>
+                  <Text style={[styles.chipTexto, { color: colores.textoSecundario }, horaSeleccionada === h && styles.chipTextoActivo]}>{h}</Text>
                 </TouchableOpacity>
               ))}
               {horasDisponibles.length === 0 && <Text style={styles.emptyText}>Sin horarios libres ese día</Text>}
@@ -241,19 +259,27 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
 
         {horaSeleccionada && (
           <>
-            <Text style={styles.label}>Tipo de consulta</Text>
+            <Text style={[styles.label, { color: colores.textoSecundario }]}>Tipo de consulta</Text>
             <View style={styles.chipsRow}>
               <TouchableOpacity
-                style={[styles.chip, tipoConsulta === 'primera_vez' && styles.chipActivo]}
+                style={[
+                  styles.chip,
+                  { backgroundColor: colores.fondoCard, borderColor: colores.borde },
+                  tipoConsulta === 'primera_vez' && styles.chipActivo,
+                ]}
                 onPress={() => setTipoConsulta('primera_vez')}
               >
-                <Text style={[styles.chipTexto, tipoConsulta === 'primera_vez' && styles.chipTextoActivo]}>Primera vez</Text>
+                <Text style={[styles.chipTexto, { color: colores.textoSecundario }, tipoConsulta === 'primera_vez' && styles.chipTextoActivo]}>Primera vez</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.chip, tipoConsulta === 'seguimiento' && styles.chipActivo]}
+                style={[
+                  styles.chip,
+                  { backgroundColor: colores.fondoCard, borderColor: colores.borde },
+                  tipoConsulta === 'seguimiento' && styles.chipActivo,
+                ]}
                 onPress={() => setTipoConsulta('seguimiento')}
               >
-                <Text style={[styles.chipTexto, tipoConsulta === 'seguimiento' && styles.chipTextoActivo]}>Seguimiento</Text>
+                <Text style={[styles.chipTexto, { color: colores.textoSecundario }, tipoConsulta === 'seguimiento' && styles.chipTextoActivo]}>Seguimiento</Text>
               </TouchableOpacity>
             </View>
 
@@ -283,80 +309,73 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
 }
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1, 
-    backgroundColor: '#F9FAFB' 
+  safeArea: {
+    flex: 1,
   },
 
   container: {
-     flexGrow: 1, 
-    padding: 20 
+    flexGrow: 1,
+    padding: 20
   },
 
   title: {
-     fontSize: 22, 
-    fontWeight: '700', 
-    color: '#111827'
-   },
-  
-   subtitle: { 
-    fontSize: 15, 
-    color: '#6B7280', 
-    marginTop: 4, 
-    marginBottom: 16 
+    fontSize: 22,
+    fontWeight: '700',
   },
 
-  label: { 
-    fontSize: 14, 
-    fontWeight: '600', 
-    color: '#374151', 
-    marginTop: 16, 
-    marginBottom: 8 
+  subtitle: {
+    fontSize: 15,
+    marginTop: 4,
+    marginBottom: 16
   },
 
-  chipsRow: { 
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    gap: 8 
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 16,
+    marginBottom: 8
+  },
+
+  chipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8
   },
 
   chip: {
-     paddingHorizontal: 14, 
-     paddingVertical: 8, 
-     borderRadius: 20, 
-     borderWidth: 1, 
-     borderColor: '#D1D5DB', 
-     backgroundColor: '#fff' 
-    },
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
 
-  chipActivo: { 
-    backgroundColor: '#2563EB', 
-    borderColor: '#2563EB' },
+  chipActivo: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB'
+  },
 
   chipTexto: {
-     fontSize: 13,
-      color: '#374151'
-    
+    fontSize: 13,
   },
-  chipTextoActivo: { 
-    color: '#fff', 
-    fontWeight: '600' 
+  chipTextoActivo: {
+    color: '#fff',
+    fontWeight: '600'
   },
 
   doctorButton: {
-     marginBottom: 8 
-    },
+    marginBottom: 8
+  },
   emptyText: {
-     fontSize: 13,
-      color: '#9CA3AF', 
-      fontStyle: 'italic'
-     },
+    fontSize: 13,
+    color: '#9CA3AF',
+    fontStyle: 'italic'
+  },
 
   errorText: {
-     color: '#DC2626', 
-     fontSize: 14, 
-     marginTop: 16,
-      marginBottom: 8, 
-      textAlign: 'center' 
-    },
+    color: '#DC2626',
+    fontSize: 14,
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center'
+  },
 });

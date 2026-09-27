@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
 
 import ReceptionHomeScreen from '../screens/ReceptionHomeScreen';
 import NuevoPacienteScreen from '../screens/NuevoPacienteScreen';
@@ -18,12 +19,17 @@ const Tab = createBottomTabNavigator<ReceptionTabsParamList>();
 //este es el navegador de pestanas (tabs) para el rol de recepcion
 //tiene el mismo patron que ya usamos en PatientTabs
 export default function ReceptionTabs() {
+  const { colores } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: true,
+        headerStyle: { backgroundColor: colores.fondoCard },
+        headerTintColor: colores.texto,
+        tabBarStyle: { backgroundColor: colores.fondoCard, borderTopColor: colores.borde },
         tabBarActiveTintColor: '#2563EB',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarInactiveTintColor: colores.textoSecundario,
         //aqui se elige el icono de cada pestana segun el nombre de la ruta
         tabBarIcon: ({ color, size }) => {
           const iconos: Record<string, keyof typeof Ionicons.glyphMap> = {
