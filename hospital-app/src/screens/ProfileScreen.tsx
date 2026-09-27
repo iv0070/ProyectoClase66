@@ -117,7 +117,7 @@ export default function PerfilScreen({ navigation }: { navigation?: any }) {
     setNuevaContrasena('');
     setConfirmarContrasena('');
     setMostrarCambioPassword(false);
-    Alert.alert('Listo', 'Tu contraseña se actualizó correctamente.');
+    Alert.alert('Listo', 'Tu contraseña se actualizo correctamente.');
   };
 
   const handleCerrarSesion = async () => {
@@ -230,15 +230,73 @@ export default function PerfilScreen({ navigation }: { navigation?: any }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { padding: 20 },
-  title: { fontSize: 24, fontWeight: '700', color: '#111827', marginBottom: 20 },
-  cargando: { fontSize: 14, color: '#6B7280', textAlign: 'center', marginTop: 40 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 18, borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 16 },
-  pasoTitulo: { fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 },
-  label: { fontSize: 12, color: '#9CA3AF', marginTop: 12 },
-  valor: { fontSize: 16, color: '#111827', fontWeight: '600' },
-  avisoBox: { backgroundColor: '#FEF3C7', borderRadius: 10, padding: 14, marginBottom: 16 },
-  avisoTexto: { fontSize: 13, color: '#92400E' },
-  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9FAFB'
+  },
+
+  container: {
+    padding: 20
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 20
+  },
+
+  cargando: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 40
+  },
+
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginBottom: 16
+  },
+
+  pasoTitulo: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 12
+  },
+
+  label: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 12
+  },
+
+  valor: {
+    fontSize: 16,
+    color: '#111827',
+    fontWeight: '600'
+  },
+
+  avisoBox: {
+    backgroundColor: '#FEF3C7',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 16
+  },
+
+  avisoTexto: {
+    fontSize: 13,
+    color: '#92400E'
+  },
+
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: 'center'
+  },
 });

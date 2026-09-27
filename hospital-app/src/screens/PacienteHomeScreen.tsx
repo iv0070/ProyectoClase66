@@ -305,26 +305,139 @@ export default function PacienteHomeScreen({ navigation }: PacienteHomeScreenPro
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flexGrow: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: '700', color: '#111827', marginBottom: 4, textAlign: 'center' },
-  subtitle: { fontSize: 15, color: '#6B7280', marginBottom: 24, textAlign: 'center' },
-  button: { marginTop: 8 },
-  seccionTitulo: { fontSize: 16, fontWeight: '600', color: '#374151', marginTop: 28, marginBottom: 12 },
-  vacio: { fontSize: 14, color: '#6B7280', textAlign: 'center', marginTop: 12 },
-  card: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#E5E7EB' },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardDoctor: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  cardFecha: { fontSize: 13, color: '#6B7280', marginTop: 6 },
-  cardMotivo: { fontSize: 13, color: '#374151', marginTop: 4 },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { color: '#fff', fontSize: 12, fontWeight: '600', textTransform: 'capitalize' },
-  sugerenciaBox: { marginTop: 10, borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 10 },
-  sugerenciaTexto: { fontSize: 13, color: '#7C3AED', fontWeight: '600', marginBottom: 8 },
-  reprogramarButton: { marginTop: 10 },
-  reprogramarBox: { marginTop: 10, borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 10 },
-  accionesRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
-  accionButton: { flex: 1 },
-  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 8, textAlign: 'center' },
-  cancelarButton: { marginTop: 10 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9FAFB'
+  },
+
+  container: {
+    flexGrow: 1,
+    padding: 20
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 4,
+    textAlign: 'center'
+  },
+
+  subtitle: {
+    fontSize: 15,
+    color: '#6B7280',
+    marginBottom: 24,
+    textAlign: 'center'
+  },
+
+  button: {
+    marginTop: 8
+  },
+
+  seccionTitulo: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginTop: 28,
+    marginBottom: 12
+  },
+
+  vacio: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 12
+  },
+
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB'
+  },
+
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+
+  cardDoctor: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827'
+  },
+
+  cardFecha: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 6
+  },
+
+  cardMotivo: {
+    fontSize: 13,
+    color: '#374151',
+    marginTop: 4
+  },
+
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12
+  },
+
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize'
+  },
+
+  sugerenciaBox: {
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 10
+  },
+
+  sugerenciaTexto: {
+    fontSize: 13,
+    color: '#7C3AED',
+    fontWeight: '600',
+    marginBottom: 8
+  },
+
+  reprogramarButton: {
+    marginTop: 10
+  },
+
+  reprogramarBox: {
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 10
+  },
+
+  accionesRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8
+  },
+
+  accionButton: {
+    flex: 1
+  },
+
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    marginBottom: 8,
+    textAlign: 'center'
+  },
+
+  cancelarButton: {
+    marginTop: 10
+  },
 });

@@ -17,7 +17,7 @@ export interface Doctor {
   id: string;
   nombre: string;
   usuario: string;
-  contrasena: string;
+  contraseña: string;
   especialidad: Especialidad;
 }
 export interface Paciente {

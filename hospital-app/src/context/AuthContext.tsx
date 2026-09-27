@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Especialidad } from '../types';
 
-import { doctores, recepcionistas } from '../data/mockData';
 import { supabase } from '../../lib/supabase';
 
 export type Rol = 'doctor' | 'paciente' | 'recepcion';
@@ -97,32 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
      return { exito: true, rol: perfil.rol, debeCambiarPassword: perfil.debe_cambiar_password };
     }
 
-    // 3. No existe en Supabase: revisar el mock (temporal, doctor/recepcion)
-    const doctorValido = doctores.find((d) => d.usuario === usuario && d.contrasena === contrasena);
-    if (doctorValido) {
-      setUser({
-        rol: 'doctor',
-        id: doctorValido.id,
-        nombre: doctorValido.nombre,
-        usuario: doctorValido.usuario,
-        especialidad: doctorValido.especialidad,
-      });
+  
     
-    
-          return { exito: true, rol: 'doctor' };
-    }
-
-    const recepcionistaValido = recepcionistas.find((r) => r.usuario === usuario && r.contrasena === contrasena);
-    if (recepcionistaValido) {
-      setUser({
-        rol: 'recepcion',
-        id: recepcionistaValido.id,
-        nombre: recepcionistaValido.nombre,
-        usuario: recepcionistaValido.usuario,
-      });
-      
-            return { exito: true, rol: 'recepcion' };
-    }
 
     return { exito: false, error: 'Usuario o contraseña incorrectos' };
   };
@@ -158,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (perfilError) {
-      return { exito: false, error: 'La cuenta se creó pero hubo un error guardando el perfil: ' + perfilError.message };
+      return { exito: false, error: 'La cuenta se creo pero hubo un error guardando el perfil: ' + perfilError.message };
     }
 
     setUser({

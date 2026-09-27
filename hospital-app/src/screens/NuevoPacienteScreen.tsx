@@ -92,7 +92,7 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
     setCargando(false);
 
     if (perfilError) {
-      setFormError('La cuenta se creó pero hubo un error guardando el perfil: ' + perfilError.message);
+      setFormError('La cuenta se creo pero hubo un error guardando el perfil: ' + perfilError.message);
       return;
     }
 
@@ -131,7 +131,7 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
         />
 
         <CustomInput
-          label="Número de identidad"
+          label="Numero de identidad"
           value={identidad}
           onChangeText={setIdentidad}
           validationType="text"
@@ -147,7 +147,7 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
         />
 
         <CustomInput
-          label="Teléfono"
+          label="Telefono"
           value={telefono}
           onChangeText={setTelefono}
           validationType="text"
@@ -169,9 +169,33 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flexGrow: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: '700', color: '#111827' },
-  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4, marginBottom: 20 },
-  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9FAFB'
+  },
+
+  container: {
+    flexGrow: 1,
+    padding: 20
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827'
+  },
+
+  subtitle: {
+    fontSize: 15,
+    color: '#6B7280',
+    marginTop: 4,
+    marginBottom: 20
+  },
+
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: 'center'
+  },
 });

@@ -23,7 +23,7 @@ function ConsultaCard({ consulta }: { consulta: ConsultaReal }) {
         <Text style={styles.cardEspecialidad}>{consulta.doctor_especialidad?.replace('_', ' ')}</Text>
       </View>
       <Text style={styles.cardDoctor}>{consulta.doctor_nombre}</Text>
-      <Text style={styles.cardLabel}>Diagnóstico</Text>
+      <Text style={styles.cardLabel}>Diagnostico</Text>
       <Text style={styles.cardTexto}>{consulta.diagnostico}</Text>
       <Text style={styles.cardLabel}>Medicamento</Text>
       <Text style={styles.cardTexto}>{consulta.medicamento}</Text>
@@ -105,16 +105,80 @@ export default function ConsultasScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: '700', color: '#111827', marginBottom: 4 },
-  subtitle: { fontSize: 15, color: '#6B7280', marginBottom: 20 },
-  vacio: { fontSize: 14, color: '#6B7280', textAlign: 'center', marginTop: 40 },
-  card: { backgroundColor: '#fff', borderRadius: 10, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#E5E7EB' },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  cardFecha: { fontSize: 13, color: '#6B7280' },
-  cardEspecialidad: { fontSize: 12, fontWeight: '600', color: '#2563EB', textTransform: 'capitalize' },
-  cardDoctor: { fontSize: 16, fontWeight: '600', color: '#111827', marginBottom: 10 },
-  cardLabel: { fontSize: 12, color: '#9CA3AF', marginTop: 4 },
-  cardTexto: { fontSize: 14, color: '#374151' },
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: '#F9FAFB' 
+  },
+
+  container: { 
+    flex: 1, 
+    padding: 20 
+  },
+
+  title: { 
+    fontSize: 24,
+     fontWeight: '700',
+      color: '#111827',
+       marginBottom: 4
+       },
+
+  subtitle: { 
+    fontSize: 15, 
+    color: '#6B7280',
+     marginBottom: 20 
+    },
+
+  vacio: { 
+    fontSize: 14, 
+    color: '#6B7280',
+     textAlign: 'center', 
+     marginTop: 40 
+    },
+
+  card: {
+     backgroundColor: '#fff',
+      borderRadius: 10,
+       padding: 16, 
+       marginBottom: 12,
+        borderWidth: 1, 
+        borderColor: '#E5E7EB'
+       },
+
+       cardHeader: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between',
+         alignItems: 'center', 
+         marginBottom: 6 
+        },
+
+  cardFecha: {
+     fontSize: 13,
+      color: '#6B7280'
+     },
+
+  cardEspecialidad: {
+     fontSize: 12,
+      fontWeight: '600', 
+      color: '#2563EB',
+       textTransform: 'capitalize' 
+      },
+
+  cardDoctor: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    color: '#111827', 
+    marginBottom: 10
+   },
+
+  cardLabel: { 
+    fontSize: 12, 
+    color: '#9CA3AF', 
+    marginTop: 4 
+  },
+
+  cardTexto: { 
+    fontSize: 14, 
+    color: '#374151'
+   },
+   
 });

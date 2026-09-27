@@ -97,9 +97,23 @@ export default function PacientesScreen({ navigation }: PacientesScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 16 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9FAFB'
+  },
+
+  container: {
+    flex: 1,
+    padding: 20
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 16
+  },
+
   buscador: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
@@ -108,9 +122,16 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: '#fff',
     marginBottom: 16,
-    fontSize: 14,
+    fontSize: 14
   },
-  vacio: { fontSize: 14, color: '#6B7280', textAlign: 'center', marginTop: 40 },
+
+  vacio: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 40
+  },
+
   card: {
     backgroundColor: '#fff',
     borderRadius: 10,
@@ -120,8 +141,17 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'center'
   },
-  cardNombre: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  cardFlecha: { fontSize: 20, color: '#9CA3AF' },
+
+  cardNombre: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827'
+  },
+
+  cardFlecha: {
+    fontSize: 20,
+    color: '#9CA3AF'
+  },
 });

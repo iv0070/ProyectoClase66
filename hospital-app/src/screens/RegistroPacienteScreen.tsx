@@ -269,31 +269,172 @@ export default function RegistroPacienteScreen({ navigation }: RegistroPacienteS
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: { flexGrow: 1, justifyContent: 'center', padding: 24, backgroundColor: '#F9FAFB' },
-  title: { fontSize: 24, fontWeight: '700', color: '#111827', textAlign: 'center', marginBottom: 16 },
-  pasoTitulo: { fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 16 },
-  puntosContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 28 },
-  punto: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#E5E7EB', marginHorizontal: 5 },
-  puntoActivo: { backgroundColor: '#2563EB', width: 12, height: 12, borderRadius: 6 },
-  puntoCompletado: { backgroundColor: '#93C5FD' },
-  label: { fontSize: 14, fontWeight: '500', marginBottom: 6, color: '#374151' },
-  fechaBoton: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: '#fff', marginBottom: 8 },
-  fechaTexto: { fontSize: 16, color: '#111827' },
-  fechaPlaceholder: { fontSize: 16, color: '#9CA3AF' },
-  edadCalculada: { fontSize: 13, color: '#2563EB', marginBottom: 16 },
-  terminosBox: { backgroundColor: '#F3F4F6', borderRadius: 8, padding: 14, marginBottom: 16 },
-  terminosTexto: { fontSize: 13, color: '#4B5563', lineHeight: 19 },
-  checkboxContainer: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 20 },
-  checkbox: { width: 22, height: 22, borderWidth: 2, borderColor: '#D1D5DB', borderRadius: 4, marginRight: 10, justifyContent: 'center', alignItems: 'center' },
-  checkboxMarcado: { backgroundColor: '#2563EB', borderColor: '#2563EB' },
-  checkboxCheck: { color: '#fff', fontSize: 14, fontWeight: '700' },
-  checkboxTexto: { flex: 1, fontSize: 14, color: '#374151' },
-  errorText: { color: '#DC2626', fontSize: 14, marginBottom: 12, textAlign: 'center' },
-  botonesFila: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
-  botonMitad: { flex: 1 },
-  botonCompleto: { flex: 1 },
-  loginContainer: { marginTop: 16, alignItems: 'center' },
-  loginTexto: { fontSize: 14, color: '#6B7280' },
-  loginLink: { color: '#2563EB', fontWeight: '600', textDecorationLine: 'underline' },
+  flex: {
+    flex: 1
+  },
+
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: '#F9FAFB'
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    textAlign: 'center',
+    marginBottom: 16
+  },
+
+  pasoTitulo: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 16
+  },
+
+  puntosContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 28
+  },
+
+  punto: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#E5E7EB',
+    marginHorizontal: 5
+  },
+
+  puntoActivo: {
+    backgroundColor: '#2563EB',
+    width: 12,
+    height: 12,
+    borderRadius: 6
+  },
+
+  puntoCompletado: {
+    backgroundColor: '#93C5FD'
+  },
+
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 6,
+    color: '#374151'
+  },
+
+  fechaBoton: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+    marginBottom: 8
+  },
+
+  fechaTexto: {
+    fontSize: 16,
+    color: '#111827'
+  },
+
+  fechaPlaceholder: {
+    fontSize: 16,
+    color: '#9CA3AF'
+  },
+
+  edadCalculada: {
+    fontSize: 13,
+    color: '#2563EB',
+    marginBottom: 16
+  },
+
+  terminosBox: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 16
+  },
+
+  terminosTexto: {
+    fontSize: 13,
+    color: '#4B5563',
+    lineHeight: 19
+  },
+
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 20
+  },
+
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    borderRadius: 4,
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+
+  checkboxMarcado: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB'
+  },
+
+  checkboxCheck: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700'
+  },
+
+  checkboxTexto: {
+    flex: 1,
+    fontSize: 14,
+    color: '#374151'
+  },
+
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: 'center'
+  },
+
+  botonesFila: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10
+  },
+
+  botonMitad: {
+    flex: 1
+  },
+
+  botonCompleto: {
+    flex: 1
+  },
+
+  loginContainer: {
+    marginTop: 16,
+    alignItems: 'center'
+  },
+
+  loginTexto: {
+    fontSize: 14,
+    color: '#6B7280'
+  },
+
+  loginLink: {
+    color: '#2563EB',
+    fontWeight: '600',
+    textDecorationLine: 'underline'
+  },
 });
