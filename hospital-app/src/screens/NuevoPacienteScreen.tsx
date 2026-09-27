@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from 'react-n
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
 import { supabase } from '../../lib/supabase';
+import { useTheme } from '../context/ThemeContext';
 
 interface NuevoPacienteScreenProps {
   navigation?: any;
@@ -11,6 +12,7 @@ interface NuevoPacienteScreenProps {
 const PASSWORD_TEMPORAL = 'Temporal123';
 
 export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenProps) {
+  const { colores } = useTheme();
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState(''); // DD/MM/AAAA
@@ -109,10 +111,10 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Nuevo paciente</Text>
-        <Text style={styles.subtitle}>Registra los datos basicos</Text>
+        <Text style={[styles.title, { color: colores.texto }]}>Nuevo paciente</Text>
+        <Text style={[styles.subtitle, { color: colores.textoSecundario }]}>Registra los datos basicos</Text>
 
         <CustomInput
           label="Nombre completo"
@@ -171,7 +173,6 @@ export default function NuevoPacienteScreen({ navigation }: NuevoPacienteScreenP
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F9FAFB'
   },
 
   container: {
@@ -182,12 +183,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#111827'
   },
 
   subtitle: {
     fontSize: 15,
-    color: '#6B7280',
     marginTop: 4,
     marginBottom: 20
   },
