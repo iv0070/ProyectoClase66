@@ -9,7 +9,7 @@ interface LoginScreenProps {
 }
 
 export default function LoginScreen({ navigation }: LoginScreenProps) {
-    const { login } = useAuth();
+  const { login } = useAuth();
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -29,7 +29,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     }
 
     // Navegar según el rol que ya quedó guardado en el context
-            if (resultado.rol === 'paciente') {
+    if (resultado.rol === 'paciente') {
       navigation?.reset({ index: 0, routes: [{ name: 'PatientTabs' }] });
     } else if (resultado.rol === 'doctor') {
       if (resultado.debeCambiarPassword) {

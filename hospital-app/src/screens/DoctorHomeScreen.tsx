@@ -39,7 +39,7 @@ const FILTROS: { key: FiltroEstado; label: string }[] = [
 ];
 
 export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [citas, setCitas] = useState<CitaConPaciente[]>([]);
   const [cargando, setCargando] = useState(true);
   const [filtro, setFiltro] = useState<FiltroEstado>('todas');

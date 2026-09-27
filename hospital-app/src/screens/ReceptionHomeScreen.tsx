@@ -32,7 +32,8 @@ interface ConsultaReal {
 }
 
 export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenProps) {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+
   const [busqueda, setBusqueda] = useState('');
   const [resultados, setResultados] = useState<PacienteReal[]>([]);
   const [buscando, setBuscando] = useState(false);
@@ -117,8 +118,7 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
   };
 
   const handleCerrarSesion = async () => {
-    await supabase.auth.signOut();
-    logout();
+    await logout();
     navigation?.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
@@ -215,7 +215,13 @@ export default function ReceptionHomeScreen({ navigation }: ReceptionHomeScreenP
         />
         <CustomButton
           title="Ver perfil"
-          onPress={() => navigation?.navigate('Perfil')}
+          onPress={() =>
+            navigation?.navigate('Perfil', {
+              rol: 'recepcion',
+              nombre: user?.nombre,
+              usuario: user?.usuario,
+            })
+          }
           variant="secondary"
           style={{ marginTop: 10 }}
         />

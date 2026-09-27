@@ -1,15 +1,21 @@
+<<<<<<< HEAD
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Especialidad } from '../types';
 
+=======
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { doctores, recepcionistas } from '../data/mockData';
+>>>>>>> c69ffc3cd2906ce6d544b1af5b367a35bf36805f
 import { supabase } from '../../lib/supabase';
 
 export type Rol = 'doctor' | 'paciente' | 'recepcion';
+type Especialidad = string;
 
 export interface AuthUser {
-  rol: Rol;
   id: string;
   nombre: string;
   usuario: string;
+  rol: Rol;
   especialidad?: Especialidad;
   edad?: number;
   telefono?: string;
@@ -19,7 +25,7 @@ export interface AuthUser {
 interface ResultadoAuth {
   exito: boolean;
   error?: string;
-   rol?: Rol;
+  rol?: Rol;
   debeCambiarPassword?: boolean;
 }
 
@@ -35,6 +41,7 @@ interface DatosRegistro {
 
 interface AuthContextType {
   user: AuthUser | null;
+  loading: boolean;
   login: (usuario: string, contraseña: string) => Promise<ResultadoAuth>;
   register: (datos: DatosRegistro) => Promise<ResultadoAuth>;
   logout: () => Promise<void>;
@@ -53,8 +60,14 @@ function calcularEdad(fechaNacimiento: string): number {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Revisa si ya hay una sesión de Supabase guardada al abrir la app
+    supabase.auth.getSession().finally(() => setLoading(false));
+  }, []);
 
   const login = async (usuario: string, contrasena: string): Promise<ResultadoAuth> => {
     if (usuario.trim() === '' || contrasena.trim() === '') {
@@ -93,11 +106,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       setUser(nuevoUsuario);
-     return { exito: true, rol: perfil.rol, debeCambiarPassword: perfil.debe_cambiar_password };
+      return { exito: true, rol: perfil.rol, debeCambiarPassword: perfil.debe_cambiar_password };
     }
 
+<<<<<<< HEAD
   
     
+=======
+    // 3. No existe en Supabase: revisar el mock (temporal, doctor/recepcion)
+    const doctorValido = doctores.find((d) => d.usuario === usuario && d.contrasena === contrasena);
+    if (doctorValido) {
+      setUser({
+        rol: 'doctor',
+        id: doctorValido.id,
+        nombre: doctorValido.nombre,
+        usuario: doctorValido.usuario,
+        especialidad: doctorValido.especialidad,
+      });
+      return { exito: true, rol: 'doctor' };
+    }
+
+    const recepcionistaValido = recepcionistas.find((r) => r.usuario === usuario && r.contrasena === contrasena);
+    if (recepcionistaValido) {
+      setUser({
+        rol: 'recepcion',
+        id: recepcionistaValido.id,
+        nombre: recepcionistaValido.nombre,
+        usuario: recepcionistaValido.usuario,
+      });
+      return { exito: true, rol: 'recepcion' };
+    }
+>>>>>>> c69ffc3cd2906ce6d544b1af5b367a35bf36805f
 
     return { exito: false, error: 'Usuario o contraseña incorrectos' };
   };
@@ -154,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

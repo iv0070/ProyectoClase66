@@ -55,7 +55,6 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
   const [formError, setFormError] = useState('');
   const [cargando, setCargando] = useState(false);
 
-  // 1. Cargar todos los doctores reales de Supabase
   useEffect(() => {
     const cargarDoctores = async () => {
       const { data } = await supabase
@@ -72,7 +71,6 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
     cargarDoctores();
   }, []);
 
-  // 2. Cuando eligen doctor, traer sus citas activas (para calcular disponibilidad)
   const cargarCitasDelDoctor = useCallback(async (doctorId: string) => {
     const { data } = await supabase
       .from('citas')
@@ -90,7 +88,6 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
     cargarCitasDelDoctor(doctor.id);
   };
 
-  // 3. Calcular que fechas estan completamente llenas (para pintarlas de gris)
   function estaLlenoElDia(fechaStr: string): boolean {
     const ocupadasEseDia = citasOcupadas.filter((c) => c.fecha === fechaStr);
     return ocupadasEseDia.length >= HORARIOS_DISPONIBLES.length;
@@ -117,7 +114,6 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
     return marcado;
   }
 
-  // 4. Horas disponibles para la fecha elegida
   const horasOcupadasEseDia = citasOcupadas
     .filter((c) => c.fecha === fechaSeleccionada)
     .map((c) => c.hora);
@@ -214,7 +210,7 @@ export default function AgendarCitaScreen({ navigation, route }: AgendarCitaScre
             <Calendar
               minDate={new Date().toISOString().split('T')[0]}
               markedDates={generarFechasMarcadas()}
-              onDayPress={(day) => {
+             onDayPress={(day: { dateString: string }) => {
                 if (!estaLlenoElDia(day.dateString)) {
                   setFechaSeleccionada(day.dateString);
                   setHoraSeleccionada(null);
