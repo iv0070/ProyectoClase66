@@ -64,7 +64,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           <Text style={styles.registroTexto}>¿No tienes una cuenta? <Text style={styles.registroLink}>Regístrate</Text></Text>
         </TouchableOpacity>
 
-        <Text style={styles.hintText}>Prueba con: carla.mejia / Temporal123 (Doctor) · daniel.martinez / Temporal123 (Recepción)</Text>
+      
       </ScrollView>
     </KeyboardAvoidingView>
   );
