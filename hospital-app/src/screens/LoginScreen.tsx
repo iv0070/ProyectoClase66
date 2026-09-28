@@ -28,7 +28,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       return;
     }
 
-    // Navegar según el rol que ya quedó guardado en el context
+    // Navegar segun el rol que ya quedo guardado en el context
     if (resultado.rol === 'paciente') {
       navigation?.reset({ index: 0, routes: [{ name: 'PatientTabs' }] });
     } else if (resultado.rol === 'doctor') {
@@ -64,7 +64,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           <Text style={styles.registroTexto}>¿No tienes una cuenta? <Text style={styles.registroLink}>Regístrate</Text></Text>
         </TouchableOpacity>
 
-        <Text style={styles.hintText}>Prueba con: carla.mejia / Temporal123 (Doctor) · daniel.martinez / Temporal123 (Recepción)</Text>
+      
       </ScrollView>
     </KeyboardAvoidingView>
   );

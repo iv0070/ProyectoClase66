@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
+import { useTheme} from '../context/ThemeContext';
 
 interface ConsultaReal {
   id: string;
@@ -16,22 +17,24 @@ interface ConsultaReal {
 }
 
 function ConsultaCard({ consulta }: { consulta: ConsultaReal }) {
+  const { colores } = useTheme();
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: colores.fondoCard, borderColor: colores.borde }]}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardFecha}>{consulta.fecha} · {consulta.hora}</Text>
+        <Text style={[styles.cardFecha, { color: colores.textoSecundario }]}>{consulta.fecha} · {consulta.hora}</Text>
         <Text style={styles.cardEspecialidad}>{consulta.doctor_especialidad?.replace('_', ' ')}</Text>
       </View>
-      <Text style={styles.cardDoctor}>{consulta.doctor_nombre}</Text>
-      <Text style={styles.cardLabel}>Diagnostico</Text>
-      <Text style={styles.cardTexto}>{consulta.diagnostico}</Text>
-      <Text style={styles.cardLabel}>Medicamento</Text>
-      <Text style={styles.cardTexto}>{consulta.medicamento}</Text>
+      <Text style={[styles.cardDoctor, { color: colores.texto }]}>{consulta.doctor_nombre}</Text>
+      <Text style={[styles.cardLabel, { color: colores.textoSecundario }]}>Diagnostico</Text>
+      <Text style={[styles.cardTexto, { color: colores.textoSecundario }]}>{consulta.diagnostico}</Text>
+      <Text style={[styles.cardLabel, { color: colores.textoSecundario }]}>Medicamento</Text>
+      <Text style={[styles.cardTexto, { color: colores.textoSecundario }]}>{consulta.medicamento}</Text>
     </View>
   );
 }
 
 export default function ConsultasScreen() {
+  const { colores } = useTheme();
   const [nombrePaciente, setNombrePaciente] = useState('');
   const [misConsultas, setMisConsultas] = useState<ConsultaReal[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -82,15 +85,15 @@ export default function ConsultasScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
       <View style={styles.container}>
-        <Text style={styles.title}>Mis consultas</Text>
-        <Text style={styles.subtitle}>Historial de {nombrePaciente}</Text>
+        <Text style={[styles.title, { color: colores.texto }]}>Mis consultas</Text>
+        <Text style={[styles.subtitle, { color: colores.textoSecundario }]}>Historial de {nombrePaciente}</Text>
 
         {cargando ? (
-          <Text style={styles.vacio}>Cargando...</Text>
+          <Text style={[styles.vacio, { color: colores.textoSecundario }]}>Cargando...</Text>
         ) : misConsultas.length === 0 ? (
-          <Text style={styles.vacio}>Aún no tienes consultas registradas.</Text>
+          <Text style={[styles.vacio, { color: colores.textoSecundario }]}>Aún no tienes consultas registradas.</Text>
         ) : (
           <FlatList
             data={misConsultas}
@@ -105,80 +108,69 @@ export default function ConsultasScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1, 
-    backgroundColor: '#F9FAFB' 
+  safeArea: {
+    flex: 1,
   },
 
-  container: { 
-    flex: 1, 
-    padding: 20 
+  container: {
+    flex: 1,
+    padding: 20
   },
 
-  title: { 
+  title: {
     fontSize: 24,
-     fontWeight: '700',
-      color: '#111827',
-       marginBottom: 4
-       },
+    fontWeight: '700',
+    marginBottom: 4
+  },
 
-  subtitle: { 
-    fontSize: 15, 
-    color: '#6B7280',
-     marginBottom: 20 
-    },
+  subtitle: {
+    fontSize: 15,
+    marginBottom: 20
+  },
 
-  vacio: { 
-    fontSize: 14, 
-    color: '#6B7280',
-     textAlign: 'center', 
-     marginTop: 40 
-    },
+  vacio: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 40
+  },
 
   card: {
-     backgroundColor: '#fff',
-      borderRadius: 10,
-       padding: 16, 
-       marginBottom: 12,
-        borderWidth: 1, 
-        borderColor: '#E5E7EB'
-       },
-
-       cardHeader: { 
-        flexDirection: 'row', 
-        justifyContent: 'space-between',
-         alignItems: 'center', 
-         marginBottom: 6 
-        },
-
-  cardFecha: {
-     fontSize: 13,
-      color: '#6B7280'
-     },
-
-  cardEspecialidad: {
-     fontSize: 12,
-      fontWeight: '600', 
-      color: '#2563EB',
-       textTransform: 'capitalize' 
-      },
-
-  cardDoctor: { 
-    fontSize: 16, 
-    fontWeight: '600', 
-    color: '#111827', 
-    marginBottom: 10
-   },
-
-  cardLabel: { 
-    fontSize: 12, 
-    color: '#9CA3AF', 
-    marginTop: 4 
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
   },
 
-  cardTexto: { 
-    fontSize: 14, 
-    color: '#374151'
-   },
-   
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6
+  },
+
+  cardFecha: {
+    fontSize: 13,
+  },
+
+  cardEspecialidad: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2563EB',
+    textTransform: 'capitalize'
+  },
+
+  cardDoctor: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10
+  },
+
+  cardLabel: {
+    fontSize: 12,
+    marginTop: 4
+  },
+
+  cardTexto: {
+    fontSize: 14,
+  },
 });

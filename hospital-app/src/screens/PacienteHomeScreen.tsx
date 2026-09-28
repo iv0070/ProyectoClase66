@@ -6,6 +6,7 @@ import CustomButton from '../components/CustomButtom';
 import CustomInput from '../components/CustomInput';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface PacienteHomeScreenProps {
   navigation?: any;
@@ -25,6 +26,7 @@ interface CitaConDoctor {
 }
 
 export default function PacienteHomeScreen({ navigation }: PacienteHomeScreenProps) {
+  const { colores } = useTheme();
   const { user } = useAuth();
   const [nombre, setNombre] = useState(user?.nombre ?? '...');
   const [citas, setCitas] = useState<CitaConDoctor[]>([]);
@@ -186,10 +188,10 @@ export default function PacienteHomeScreen({ navigation }: PacienteHomeScreenPro
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Hola, {nombre}</Text>
-        <Text style={styles.subtitle}>¿Qué deseas hacer hoy?</Text>
+        <Text style={[styles.title, { color: colores.texto }]}>Hola, {nombre}</Text>
+        <Text style={[styles.subtitle, { color: colores.textoSecundario }]}>¿Qué deseas hacer hoy?</Text>
 
         <CustomButton
           title="Agendar cita"
@@ -198,30 +200,30 @@ export default function PacienteHomeScreen({ navigation }: PacienteHomeScreenPro
           style={styles.button}
         />
 
-        <Text style={styles.seccionTitulo}>Mis citas</Text>
+        <Text style={[styles.seccionTitulo, { color: colores.textoSecundario }]}>Mis citas</Text>
 
         {cargando ? (
-          <Text style={styles.vacio}>Cargando...</Text>
+          <Text style={[styles.vacio, { color: colores.textoSecundario }]}>Cargando...</Text>
         ) : citas.length === 0 ? (
-          <Text style={styles.vacio}>No tienes citas registradas.</Text>
+          <Text style={[styles.vacio, { color: colores.textoSecundario }]}>No tienes citas registradas.</Text>
         ) : (
           <FlatList
             data={citas}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
             renderItem={({ item }) => (
-              <View style={styles.card}>
+              <View style={[styles.card, { backgroundColor: colores.fondoCard, borderColor: colores.borde }]}>
                 <View style={styles.cardHeader}>
-                  <Text style={styles.cardDoctor}>{item.doctor?.nombre ?? 'Doctor'}</Text>
+                  <Text style={[styles.cardDoctor, { color: colores.texto }]}>{item.doctor?.nombre ?? 'Doctor'}</Text>
                   <View style={[styles.badge, { backgroundColor: getColorEstado(item.estado) }]}>
                     <Text style={styles.badgeText}>{item.estado.replace('_', ' ')}</Text>
                   </View>
                 </View>
-                <Text style={styles.cardFecha}>{item.fecha} · {item.hora}</Text>
-                {item.motivo && <Text style={styles.cardMotivo}>{item.motivo}</Text>}
+                <Text style={[styles.cardFecha, { color: colores.textoSecundario }]}>{item.fecha} · {item.hora}</Text>
+                {item.motivo && <Text style={[styles.cardMotivo, { color: colores.textoSecundario }]}>{item.motivo}</Text>}
 
                 {item.estado === 'reprogramacion_sugerida' && (
-                  <View style={styles.sugerenciaBox}>
+                  <View style={[styles.sugerenciaBox, { borderTopColor: colores.borde }]}>
                     <Text style={styles.sugerenciaTexto}>
                       El doctor propuso: {item.fecha_sugerida} · {item.hora_sugerida}
                     </Text>
@@ -252,7 +254,7 @@ export default function PacienteHomeScreen({ navigation }: PacienteHomeScreenPro
                 )}
 
                 {citaEnReprogramacion === item.id && (
-                  <View style={styles.reprogramarBox}>
+                  <View style={[styles.reprogramarBox, { borderTopColor: colores.borde }]}>
                     <CustomInput
                       label="Nueva fecha (AAAA-MM-DD)"
                       value={nuevaFecha}
@@ -307,7 +309,6 @@ export default function PacienteHomeScreen({ navigation }: PacienteHomeScreenPro
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F9FAFB'
   },
 
   container: {
@@ -318,14 +319,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111827',
     marginBottom: 4,
     textAlign: 'center'
   },
 
   subtitle: {
     fontSize: 15,
-    color: '#6B7280',
     marginBottom: 24,
     textAlign: 'center'
   },
@@ -337,25 +336,21 @@ const styles = StyleSheet.create({
   seccionTitulo: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
     marginTop: 28,
     marginBottom: 12
   },
 
   vacio: {
     fontSize: 14,
-    color: '#6B7280',
     textAlign: 'center',
     marginTop: 12
   },
 
   card: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#E5E7EB'
   },
 
   cardHeader: {
@@ -367,18 +362,15 @@ const styles = StyleSheet.create({
   cardDoctor: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827'
   },
 
   cardFecha: {
     fontSize: 13,
-    color: '#6B7280',
     marginTop: 6
   },
 
   cardMotivo: {
     fontSize: 13,
-    color: '#374151',
     marginTop: 4
   },
 
@@ -398,7 +390,6 @@ const styles = StyleSheet.create({
   sugerenciaBox: {
     marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
     paddingTop: 10
   },
 
@@ -416,7 +407,6 @@ const styles = StyleSheet.create({
   reprogramarBox: {
     marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
     paddingTop: 10
   },
 

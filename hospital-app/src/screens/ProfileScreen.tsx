@@ -1,10 +1,11 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
 import CustomButton from '../components/CustomButtom';
 import CustomInput from '../components/CustomInput';
+import { useTheme } from '../context/ThemeContext';
 
 interface Perfil {
   nombre: string;
@@ -20,6 +21,8 @@ interface Perfil {
 }
 
 export default function PerfilScreen({ navigation }: { navigation?: any }) {
+  const { tema, colores, toggleTema } = useTheme();
+
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [cargando, setCargando] = useState(true);
   const [editando, setEditando] = useState(false);
@@ -127,27 +130,32 @@ export default function PerfilScreen({ navigation }: { navigation?: any }) {
 
   if (cargando) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <Text style={styles.cargando}>Cargando perfil...</Text>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
+        <Text style={[styles.cargando, { color: colores.textoSecundario }]}>Cargando perfil...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Mi perfil</Text>
+        <Text style={[styles.title, { color: colores.texto }]}>Mi perfil</Text>
+
+        <View style={[styles.filaTema, { borderBottomColor: colores.borde }]}>
+          <Text style={{ color: colores.texto, fontSize: 15 }}>Modo oscuro</Text>
+          <Switch value={tema === 'oscuro'} onValueChange={toggleTema} />
+        </View>
 
         {perfil && (
-          <View style={styles.card}>
-            <Text style={styles.label}>Nombre</Text>
-            <Text style={styles.valor}>{perfil.nombre}</Text>
-            <Text style={styles.label}>Usuario</Text>
-            <Text style={styles.valor}>{perfil.usuario}</Text>
-            <Text style={styles.label}>Teléfono</Text>
-            <Text style={styles.valor}>{perfil.telefono ?? 'No especificado'}</Text>
-            <Text style={styles.label}>Identidad</Text>
-            <Text style={styles.valor}>{perfil.identidad ?? 'No especificada'}</Text>
+          <View style={[styles.card, { backgroundColor: colores.fondoCard, borderColor: colores.borde }]}>
+            <Text style={[styles.label, { color: colores.textoSecundario }]}>Nombre</Text>
+            <Text style={[styles.valor, { color: colores.texto }]}>{perfil.nombre}</Text>
+            <Text style={[styles.label, { color: colores.textoSecundario }]}>Usuario</Text>
+            <Text style={[styles.valor, { color: colores.texto }]}>{perfil.usuario}</Text>
+            <Text style={[styles.label, { color: colores.textoSecundario }]}>Teléfono</Text>
+            <Text style={[styles.valor, { color: colores.texto }]}>{perfil.telefono ?? 'No especificado'}</Text>
+            <Text style={[styles.label, { color: colores.textoSecundario }]}>Identidad</Text>
+            <Text style={[styles.valor, { color: colores.texto }]}>{perfil.identidad ?? 'No especificada'}</Text>
           </View>
         )}
 
@@ -175,8 +183,8 @@ export default function PerfilScreen({ navigation }: { navigation?: any }) {
         )}
 
         {editando && (
-          <View style={styles.card}>
-            <Text style={styles.pasoTitulo}>Información adicional</Text>
+          <View style={[styles.card, { backgroundColor: colores.fondoCard, borderColor: colores.borde }]}>
+            <Text style={[styles.pasoTitulo, { color: colores.texto }]}>Información adicional</Text>
             <CustomInput label="Dirección" value={direccion} onChangeText={setDireccion} validationType="text" required={false} placeholder="Col. Ejemplo, calle..." />
             <CustomInput label="Tipo de sangre" value={tipoSangre} onChangeText={setTipoSangre} validationType="text" required={false} placeholder="O+" />
             <CustomInput label="Alergias" value={alergias} onChangeText={setAlergias} validationType="text" required={false} placeholder="Penicilina, mariscos..." />
@@ -203,7 +211,7 @@ export default function PerfilScreen({ navigation }: { navigation?: any }) {
             style={{ marginTop: 20 }}
           />
         ) : (
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: colores.fondoCard, borderColor: colores.borde }]}>
             <CustomInput label="Nueva contraseña" value={nuevaContrasena} onChangeText={setNuevaContrasena} validationType="password" placeholder="••••••••" />
             <CustomInput label="Confirmar nueva contraseña" value={confirmarContrasena} onChangeText={setConfirmarContrasena} validationType="password" placeholder="••••••••" />
             {errorPassword ? <Text style={styles.errorText}>{errorPassword}</Text> : null}
@@ -232,7 +240,6 @@ export default function PerfilScreen({ navigation }: { navigation?: any }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F9FAFB'
   },
 
   container: {
@@ -242,42 +249,44 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111827',
     marginBottom: 20
+  },
+
+  filaTema: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    marginBottom: 16,
   },
 
   cargando: {
     fontSize: 14,
-    color: '#6B7280',
     textAlign: 'center',
     marginTop: 40
   },
 
   card: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     marginBottom: 16
   },
 
   pasoTitulo: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
     marginBottom: 12
   },
 
   label: {
     fontSize: 12,
-    color: '#9CA3AF',
     marginTop: 12
   },
 
   valor: {
     fontSize: 16,
-    color: '#111827',
     fontWeight: '600'
   },
 

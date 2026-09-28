@@ -5,6 +5,7 @@ import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButtom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface NuevaConsultaScreenProps {
   navigation?: any;
@@ -15,11 +16,12 @@ interface CitaConfirmada {
   paciente_id: string;
   fecha: string;
   hora: string;
-   motivo: string | null;
+  motivo: string | null;
   paciente: { nombre: string } | null;
 }
 
 export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenProps) {
+  const { colores } = useTheme();
   const { user } = useAuth();
 
   const [citasConfirmadas, setCitasConfirmadas] = useState<CitaConfirmada[]>([]);
@@ -31,7 +33,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
   const [sintomas, setSintomas] = useState('');
   const [diagnostico, setDiagnostico] = useState('');
   const [medicamento, setMedicamento] = useState('');
-   const [notas, setNotas] = useState('');
+  const [notas, setNotas] = useState('');
   const [formError, setFormError] = useState('');
   const [cargando, setCargando] = useState(false);
 
@@ -40,7 +42,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
 
     const { data, error } = await supabase
       .from('citas')
-            .select('id, paciente_id, fecha, hora, motivo, paciente:perfiles!paciente_id(nombre)')
+      .select('id, paciente_id, fecha, hora, motivo, paciente:perfiles!paciente_id(nombre)')
       .eq('doctor_id', user.id)
       .eq('estado', 'confirmada')
       .order('fecha', { ascending: true });
@@ -99,7 +101,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
       sintomas,
       diagnostico,
       medicamento,
-        notas: notas.trim() || null,
+      notas: notas.trim() || null,
     });
 
     if (consultaError) {
@@ -133,16 +135,16 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Nueva consulta</Text>
-        <Text style={styles.subtitle}>Elige el paciente (cita confirmada)</Text>
+        <Text style={[styles.title, { color: colores.texto }]}>Nueva consulta</Text>
+        <Text style={[styles.subtitle, { color: colores.textoSecundario }]}>Elige el paciente (cita confirmada)</Text>
 
         <View style={styles.citasList}>
           {cargandoCitas ? (
-            <Text style={styles.emptyText}>Cargando citas...</Text>
+            <Text style={[styles.emptyText, { color: colores.textoSecundario }]}>Cargando citas...</Text>
           ) : citasConfirmadas.length === 0 ? (
-            <Text style={styles.emptyText}>No tienes citas confirmadas por ahora</Text>
+            <Text style={[styles.emptyText, { color: colores.textoSecundario }]}>No tienes citas confirmadas por ahora</Text>
           ) : (
             citasConfirmadas.map((item) => {
               const seleccionada = citaSeleccionada?.id === item.id;
@@ -159,7 +161,7 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
           )}
         </View>
 
-               {citaSeleccionada && (
+        {citaSeleccionada && (
           <>
             {citaSeleccionada.motivo && (
               <View style={styles.motivoBox}>
@@ -209,7 +211,6 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
               validationType="text"
               placeholder="Medicamento recetado"
             />
-               
 
             <CustomInput
               label="Notas / Observaciones"
@@ -219,7 +220,6 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
               placeholder="Observaciones adicionales sobre la consulta (opcional)"
               multiline
             />
-
           </>
         )}
 
@@ -240,7 +240,6 @@ export default function NuevaConsultaScreen({ navigation }: NuevaConsultaScreenP
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F9FAFB'
   },
 
   container: {
@@ -251,12 +250,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#111827'
   },
 
   subtitle: {
     fontSize: 15,
-    color: '#6B7280',
     marginTop: 4,
     marginBottom: 12
   },
@@ -290,7 +287,6 @@ const styles = StyleSheet.create({
 
   emptyText: {
     textAlign: 'center',
-    color: '#9CA3AF',
     marginVertical: 12
   },
 

@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { Especialidad } from '../types';
 import { supabase } from '../../lib/supabase';
 
 export type Rol = 'doctor' | 'paciente' | 'recepcion';
-type Especialidad = string;
 
 export interface AuthUser {
   id: string;
@@ -53,12 +53,12 @@ function calcularEdad(fechaNacimiento: string): number {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    //revisa si ya hay una seson de supabase guardada al abrir la app
+    // revisa si ya hay una sesion de supabase guardada al abrir la app
     supabase.auth.getSession().finally(() => setLoading(false));
   }, []);
 
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { exito: false, error: 'Debes ingresar usuario y contraseña' };
     }
 
-    //buscar el perfil en supabase por el campo "usuario"
+    // buscar el perfil en supabase por el campo "usuario"
     const { data: perfil, error: perfilError } = await supabase
       .from('perfiles')
       .select('id, email, rol, nombre, usuario, especialidad, telefono, fecha_nacimiento, debe_cambiar_password')

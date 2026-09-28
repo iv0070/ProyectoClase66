@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface PacientesScreenProps {
   navigation?: any;
@@ -15,6 +16,7 @@ interface PacienteResumen {
 }
 
 export default function PacientesScreen({ navigation }: PacientesScreenProps) {
+  const { colores } = useTheme();
   const { user } = useAuth();
   const [pacientes, setPacientes] = useState<PacienteResumen[]>([]);
   const [busqueda, setBusqueda] = useState('');
@@ -52,22 +54,23 @@ export default function PacientesScreen({ navigation }: PacientesScreenProps) {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
       <View style={styles.container}>
-        <Text style={styles.title}>Historial de pacientes</Text>
+        <Text style={[styles.title, { color: colores.texto }]}>Historial de pacientes</Text>
 
         <TextInput
-          style={styles.buscador}
+          style={[styles.buscador, { backgroundColor: colores.fondoCard, borderColor: colores.borde, color: colores.texto }]}
           placeholder="Buscar paciente..."
+          placeholderTextColor={colores.textoSecundario}
           value={busqueda}
           onChangeText={setBusqueda}
           autoCapitalize="none"
         />
 
         {cargando ? (
-          <Text style={styles.vacio}>Cargando...</Text>
+          <Text style={[styles.vacio, { color: colores.textoSecundario }]}>Cargando...</Text>
         ) : pacientesFiltrados.length === 0 ? (
-          <Text style={styles.vacio}>
+          <Text style={[styles.vacio, { color: colores.textoSecundario }]}>
             {pacientes.length === 0 ? 'Aún no has atendido pacientes.' : 'Sin resultados.'}
           </Text>
         ) : (
@@ -77,7 +80,7 @@ export default function PacientesScreen({ navigation }: PacientesScreenProps) {
             contentContainerStyle={{ paddingBottom: 20 }}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={styles.card}
+                style={[styles.card, { backgroundColor: colores.fondoCard, borderColor: colores.borde }]}
                 onPress={() =>
                   navigation?.navigate('HistorialPaciente', {
                     pacienteId: item.id,
@@ -85,8 +88,8 @@ export default function PacientesScreen({ navigation }: PacientesScreenProps) {
                   })
                 }
               >
-                <Text style={styles.cardNombre}>{item.nombre}</Text>
-                <Text style={styles.cardFlecha}>›</Text>
+                <Text style={[styles.cardNombre, { color: colores.texto }]}>{item.nombre}</Text>
+                <Text style={[styles.cardFlecha, { color: colores.textoSecundario }]}>›</Text>
               </TouchableOpacity>
             )}
           />
@@ -99,7 +102,6 @@ export default function PacientesScreen({ navigation }: PacientesScreenProps) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F9FAFB'
   },
 
   container: {
@@ -110,35 +112,29 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#111827',
     marginBottom: 16
   },
 
   buscador: {
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    backgroundColor: '#fff',
     marginBottom: 16,
     fontSize: 14
   },
 
   vacio: {
     fontSize: 14,
-    color: '#6B7280',
     textAlign: 'center',
     marginTop: 40
   },
 
   card: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 14,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center'
@@ -147,11 +143,9 @@ const styles = StyleSheet.create({
   cardNombre: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827'
   },
 
   cardFlecha: {
     fontSize: 20,
-    color: '#9CA3AF'
   },
 });

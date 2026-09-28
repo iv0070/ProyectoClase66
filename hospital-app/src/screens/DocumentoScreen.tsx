@@ -4,6 +4,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import CustomButton from '../components/CustomButtom';
+import { useTheme } from '../context/ThemeContext';
 
 type TipoPersona = 'nino' | 'adulto';
 type Motivo = 'trabajo' | 'escuela' | 'universidad';
@@ -28,6 +29,7 @@ const nombresMotivo: Record<Motivo, string> = {
 };
 
 export default function DocumentoScreen({ navigation, route }: DocumentoScreenProps) {
+  const { colores } = useTheme();
   const datos = route?.params ?? {
     fecha: '27/08/2026',
     hora: '09:00 AM',
@@ -39,8 +41,8 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
   const [tipoPersona, setTipoPersona] = useState<TipoPersona>('adulto');
   const [motivo, setMotivo] = useState<Motivo>('trabajo');
   const [generando, setGenerando] = useState(false);
- 
-    const compartirPdf = async (html: string) => {
+
+  const compartirPdf = async (html: string) => {
     try {
       setGenerando(true);
       const { base64 } = await Print.printToFileAsync({ html, base64: true });
@@ -118,17 +120,17 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Documentos generados</Text>
+        <Text style={[styles.title, { color: colores.texto }]}>Documentos generados</Text>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Nota médica</Text>
-          <Text style={styles.line}>Fecha: {datos.fecha}</Text>
-          <Text style={styles.line}>Hora: {datos.hora}</Text>
-          <Text style={styles.line}>Síntomas: {datos.sintomas}</Text>
-          <Text style={styles.line}>Diagnóstico: {datos.diagnostico}</Text>
-          <Text style={styles.line}>Medicamento: {datos.medicamento}</Text>
+        <View style={[styles.card, { backgroundColor: colores.fondoCard, borderColor: colores.borde }]}>
+          <Text style={[styles.cardTitle, { color: colores.texto }]}>Nota médica</Text>
+          <Text style={[styles.line, { color: colores.textoSecundario }]}>Fecha: {datos.fecha}</Text>
+          <Text style={[styles.line, { color: colores.textoSecundario }]}>Hora: {datos.hora}</Text>
+          <Text style={[styles.line, { color: colores.textoSecundario }]}>Síntomas: {datos.sintomas}</Text>
+          <Text style={[styles.line, { color: colores.textoSecundario }]}>Diagnóstico: {datos.diagnostico}</Text>
+          <Text style={[styles.line, { color: colores.textoSecundario }]}>Medicamento: {datos.medicamento}</Text>
 
           <CustomButton
             title={generando ? 'Generando...' : 'Generar PDF de nota médica'}
@@ -138,7 +140,7 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
           />
         </View>
 
-        <Text style={styles.sectionLabel}>Tipo de constancia</Text>
+        <Text style={[styles.sectionLabel, { color: colores.textoSecundario }]}>Tipo de constancia</Text>
         <View style={styles.optionsRow}>
           <CustomButton
             title="Niño"
@@ -154,7 +156,7 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
           />
         </View>
 
-        <Text style={styles.sectionLabel}>Motivo</Text>
+        <Text style={[styles.sectionLabel, { color: colores.textoSecundario }]}>Motivo</Text>
         <View style={styles.optionsRow}>
           <CustomButton
             title="Trabajo"
@@ -176,9 +178,9 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
           />
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Constancia</Text>
-          <Text style={styles.line}>
+        <View style={[styles.card, { backgroundColor: colores.fondoCard, borderColor: colores.borde }]}>
+          <Text style={[styles.cardTitle, { color: colores.texto }]}>Constancia</Text>
+          <Text style={[styles.line, { color: colores.textoSecundario }]}>
             Se constata que el paciente ({tipoPersona === 'nino' ? 'menor de edad' : 'adulto'}) fue
             atendido en consulta médica el día {datos.fecha}, por lo cual se recomienda reposo
             justificado para efectos de {motivo}.
@@ -205,7 +207,6 @@ export default function DocumentoScreen({ navigation, route }: DocumentoScreenPr
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   container: {
     flexGrow: 1,
@@ -214,33 +215,27 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#111827',
     marginBottom: 16,
   },
   card: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 16,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#111827',
     marginBottom: 10,
   },
   line: {
     fontSize: 14,
-    color: '#374151',
     marginBottom: 6,
     lineHeight: 20,
   },
   sectionLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
     marginBottom: 8,
   },
   optionsRow: {

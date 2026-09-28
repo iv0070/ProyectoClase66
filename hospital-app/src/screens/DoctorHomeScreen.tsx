@@ -5,6 +5,7 @@ import CustomButton from '../components/CustomButtom';
 import CustomInput from '../components/CustomInput';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface DoctorHomeScreenProps {
   navigation?: any;
@@ -39,6 +40,7 @@ const FILTROS: { key: FiltroEstado; label: string }[] = [
 ];
 
 export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) {
+  const { colores } = useTheme();
   const { user } = useAuth();
   const [citas, setCitas] = useState<CitaConPaciente[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -72,9 +74,9 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
 
   if (!user) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
         <View style={styles.container}>
-          <Text style={styles.title}>No hay sesion activa</Text>
+          <Text style={[styles.title, { color: colores.texto }]}>No hay sesion activa</Text>
         </View>
       </SafeAreaView>
     );
@@ -169,7 +171,7 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
       setSugerenciaError('Debes ingresar fecha y hora sugeridas');
       return;
     }
-
+//
     const { error } = await supabase
       .from('citas')
       .update({
@@ -193,21 +195,21 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
   };
 
   const renderCita = ({ item }: { item: CitaConPaciente }) => (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: colores.fondoCard, borderColor: colores.borde }]}>
       <View style={styles.cardHeader}>
-        <Text style={styles.pacienteNombre}>{getNombrePaciente(item)}</Text>
+        <Text style={[styles.pacienteNombre, { color: colores.texto }]}>{getNombrePaciente(item)}</Text>
         <View style={[styles.badge, { backgroundColor: getColorEstado(item.estado) }]}>
           <Text style={styles.badgeText}>{item.estado.replace('_', ' ')}</Text>
         </View>
       </View>
-      <Text style={styles.hora}>{item.fecha} · {item.hora}</Text>
+      <Text style={[styles.hora, { color: colores.textoSecundario }]}>{item.fecha} · {item.hora}</Text>
 
       {item.tipo_consulta && (
         <Text style={styles.tipoConsulta}>
           {item.tipo_consulta === 'primera_vez' ? 'Primera vez' : 'Seguimiento'}
         </Text>
       )}
-      {item.motivo && <Text style={styles.motivo}>{item.motivo}</Text>}
+      {item.motivo && <Text style={[styles.motivo, { color: colores.textoSecundario }]}>{item.motivo}</Text>}
 
       {item.estado === 'reprogramacion_sugerida' && item.fecha_sugerida && (
         <Text style={styles.sugerenciaTexto}>
@@ -233,7 +235,7 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
       )}
 
       {citaEnSugerencia === item.id && (
-        <View style={styles.sugerenciaBox}>
+        <View style={[styles.sugerenciaBox, { borderTopColor: colores.borde }]}>
           <CustomInput
             label="Fecha sugerida (AAAA-MM-DD)"
             value={fechaSugerida}
@@ -271,10 +273,10 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colores.fondo }]}>
       <View style={styles.container}>
-        <Text style={styles.title}>Hola, {user.nombre}</Text>
-        <Text style={styles.subtitle}>Citas de hoy</Text>
+        <Text style={[styles.title, { color: colores.texto }]}>Hola, {user.nombre}</Text>
+        <Text style={[styles.subtitle, { color: colores.textoSecundario }]}>Citas de hoy</Text>
 
         <View style={styles.filtrosRow}>
           {FILTROS.map((f) => {
@@ -282,17 +284,21 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
             return (
               <TouchableOpacity
                 key={f.key}
-                style={[styles.chip, activo && styles.chipActivo]}
+                style={[
+                  styles.chip,
+                  { backgroundColor: colores.fondoCard, borderColor: colores.borde },
+                  activo && styles.chipActivo,
+                ]}
                 onPress={() => setFiltro(f.key)}
               >
-                <Text style={[styles.chipTexto, activo && styles.chipTextoActivo]}>{f.label}</Text>
+                <Text style={[styles.chipTexto, { color: colores.textoSecundario }, activo && styles.chipTextoActivo]}>{f.label}</Text>
               </TouchableOpacity>
             );
           })}
         </View>
 
         {cargando ? (
-          <Text style={styles.emptyText}>Cargando citas...</Text>
+          <Text style={[styles.emptyText, { color: colores.textoSecundario }]}>Cargando citas...</Text>
         ) : (
           <FlatList
             data={citasFiltradas}
@@ -300,7 +306,7 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
             renderItem={renderCita}
             contentContainerStyle={styles.list}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No hay citas en este filtro</Text>
+              <Text style={[styles.emptyText, { color: colores.textoSecundario }]}>No hay citas en este filtro</Text>
             }
           />
         )}
@@ -312,7 +318,6 @@ export default function DoctorHomeScreen({ navigation }: DoctorHomeScreenProps) 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F9FAFB'
   },
 
   container: {
@@ -323,12 +328,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#111827'
   },
 
   subtitle: {
     fontSize: 15,
-    color: '#6B7280',
     marginTop: 4,
     marginBottom: 12
   },
@@ -345,8 +348,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
-    backgroundColor: '#fff'
   },
 
   chipActivo: {
@@ -356,7 +357,6 @@ const styles = StyleSheet.create({
 
   chipTexto: {
     fontSize: 13,
-    color: '#374151'
   },
 
   chipTextoActivo: {
@@ -369,12 +369,10 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#E5E7EB'
   },
 
   cardHeader: {
@@ -386,7 +384,6 @@ const styles = StyleSheet.create({
   pacienteNombre: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827'
   },
 
   badge: {
@@ -404,7 +401,6 @@ const styles = StyleSheet.create({
 
   hora: {
     fontSize: 13,
-    color: '#6B7280',
     marginTop: 6
   },
 
@@ -417,7 +413,6 @@ const styles = StyleSheet.create({
 
   motivo: {
     fontSize: 13,
-    color: '#374151',
     marginTop: 4
   },
 
@@ -441,7 +436,6 @@ const styles = StyleSheet.create({
   sugerenciaBox: {
     marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
     paddingTop: 10
   },
 
@@ -454,7 +448,6 @@ const styles = StyleSheet.create({
 
   emptyText: {
     textAlign: 'center',
-    color: '#9CA3AF',
     marginTop: 40
   },
 });

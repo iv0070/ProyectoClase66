@@ -1,7 +1,8 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/LoginScreen';
+import { useTheme } from '../context/ThemeContext';
 
 import ReceptionStackNavigator from './ReceptionStackNavigator';
 import PatientStackNavigator from './PatientStackNavigator';
@@ -21,8 +22,21 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
+  const { tema, colores } = useTheme();
+
+  const navTheme = {
+    ...(tema === 'oscuro' ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(tema === 'oscuro' ? DarkTheme.colors : DefaultTheme.colors),
+      background: colores.fondo,
+      card: colores.fondoCard,
+      text: colores.texto,
+      border: colores.borde,
+    },
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navTheme}>
       <Stack.Navigator
         initialRouteName="Login"
         screenOptions={{ headerShown: false }}
